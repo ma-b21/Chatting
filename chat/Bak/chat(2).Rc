@@ -1,1 +1,2 @@
+#include "Res/mainDlg.rc"
 #include "Res/loginDlg.rc"

@@ -56,7 +56,6 @@ DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 				inc SERVER_STATE
 				invoke SetWindowText,btnhWnd,OFFSET BTN_UPTEXT
 				invoke CreateThread,NULL,0,OFFSET StartServer,DEFAULT_PORT,0,NULL
-				;TODO
 			.ELSE
 				mov SERVER_STATE, 0
 				invoke SetWindowText,btnhWnd,OFFSET BTN_DOWNTEXT
@@ -86,19 +85,20 @@ StartServer PROC, port:DWORD
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
 		ret
 	.ENDIF
-	
-	.WHILE TRUE
+
+	.WHILE SERVER_STATE != 0
 		invoke accept,serverListenfd,NULL,NULL
-		.IF SERVER_STATE == 0
-			.BREAK
-		.ENDIF
+		mov @clientConnfd,eax
+        
+        .IF SERVER_STATE == 0
+        	.BREAK
+        .ENDIF
 		.IF eax == -1
 			invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
 			.CONTINUE
 		.ENDIF
-		
-		mov @clientConnfd,eax
-		invoke CreateThread,NULL,0,OFFSET CommunicateWithClient,@clientConnfd,0,NULL
+        
+        invoke CreateThread,NULL,0,OFFSET CommunicateWithClient,@clientConnfd,0,NULL
 	.ENDW
 	
 	invoke closesocket,serverListenfd
@@ -116,13 +116,14 @@ StopServer PROC
 	.WHILE ecx < MAX_CONNECT
 	
 		mov [edi].IsUsed,0
+		push ecx
 		invoke RtlZeroMemory,ADDR [edi].UserName,128
+		invoke SendServerResponse,[edi].Sockfd,S_SERVERSTOP,NULL
 		invoke closesocket,[edi].Sockfd
-		
+		pop ecx
 		add edi,TYPE CLIENT
 		inc ecx
 	.ENDW
-	
 	@UNLOCK_SHARE_VAR
 	invoke UpdateClientList
 	ret
@@ -130,6 +131,7 @@ StopServer PROC
 StopServer ENDP
 
 CommunicateWithClient   PROC, connfd:DWORD
+
 	LOCAL @sockfdSet:fd_set
 	LOCAL @timeout: timeval
 	LOCAL @msg:CLIENT_MSG
@@ -140,37 +142,15 @@ CommunicateWithClient   PROC, connfd:DWORD
     mov    @timeout.tv_sec, 0
     mov    @timeout.tv_usec, 200*1000
 
-	.WHILE TRUE
-    	invoke ioctlsocket, connfd, FIONREAD, ADDR @bytesAvailable
-    	.IF eax == SOCKET_ERROR
-    		
-        	@LOCK_SHARE_VAR
-        	
-        	mov edi,OFFSET CLIENTLIST
-			ASSUME edi:PTR CLIENT
-			mov ecx,0
-			.WHILE ecx < MAX_CONNECT
-				.IF [edi].IsUsed != 0
-					mov eax,[edi].Sockfd
-					.IF connfd == eax
-						mov [edi].IsUsed,0
-						invoke RtlZeroMemory,ADDR [edi].UserName,128
-						invoke closesocket,connfd
-						invoke UpdateClientList
-						.BREAK
-					.ENDIF
-				.ENDIF
-				add edi,TYPE CLIENT
-				inc ecx
-			.ENDW
-			
-			@UNLOCK_SHARE_VAR
-        	.BREAK
-    	.ENDIF
-    	
+	.WHILE SERVER_STATE != 0
 		invoke select, 0, ADDR @sockfdSet, NULL, NULL, ADDR @timeout
+		
         .IF eax == 0
             .CONTINUE
+        .ENDIF
+        
+        .IF eax == SOCKET_ERROR
+        	.BREAK
         .ENDIF
         
         invoke HandleRecvClientMsg,connfd
@@ -181,10 +161,17 @@ CommunicateWithClient   PROC, connfd:DWORD
 
 CommunicateWithClient ENDP
 
-HandleRecvClientMsg           PROC, connfd:DWORD
+HandleRecvClientMsg     PROC, connfd:DWORD
 
+	LOCAL @fileHandle:DWORD
+	LOCAL @dataLen:DWORD
+	
 	invoke RtlZeroMemory, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER
 	invoke recv, connfd, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER, 0
+	push eax
+	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
+	pop eax
+	
 	mov esi, OFFSET READSOCKETBUFFER
 	ASSUME esi: PTR CLIENT_MSG
 	.IF eax != SOCKET_ERROR 
@@ -194,6 +181,33 @@ HandleRecvClientMsg           PROC, connfd:DWORD
 			invoke HandleLogout, connfd
 		.ELSEIF [esi].C_Sign == C_REGISTER
 			invoke HandleRegister, connfd, esi
+		.ELSEIF [esi].C_Sign == C_GETFRIEND
+			invoke wsprintf, OFFSET HD_STRINGBUFFER, OFFSET FRIENDPATH,ADDR [esi].C_Target
+
+    		; Open File Named FILE
+    		invoke CreateFile, OFFSET HD_STRINGBUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    		.IF eax == INVALID_HANDLE_VALUE
+        		invoke SendServerResponse,connfd,0,NULL
+        		ret
+    		.ENDIF
+    		; Save the file handle
+    		mov @fileHandle, eax 
+
+    		; Read file contents
+    		invoke ReadFile, @fileHandle, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+    		.IF eax == FALSE
+    			invoke CloseHandle, @fileHandle
+        		invoke SendServerResponse,connfd,0,NULL
+        		ret  ; Failed to handle file
+    		.ENDIF
+    		; Close file handler
+    		invoke CloseHandle, @fileHandle
+    
+    		; Add '\0' to the end
+    		mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
+    		add eax, @dataLen
+    		mov BYTE PTR [eax], 0
+    		invoke SendServerResponse,connfd,0,OFFSET READFILEBUFFER
 		.ENDIF
 	.ENDIF
 
@@ -205,8 +219,7 @@ HandleRecvClientMsg           ENDP
 
 HandleLogout PROC,connfd:DWORD
 	
-	@LOCK_SHARE_VAR
-        	
+    
     mov edi,OFFSET CLIENTLIST
 	ASSUME edi:PTR CLIENT
 	mov ecx,0
@@ -215,9 +228,15 @@ HandleLogout PROC,connfd:DWORD
 			mov eax,[edi].Sockfd
 			.IF connfd == eax
 				mov [edi].IsUsed,0
+				push eax
+				push ecx
+				push edi
 				invoke RtlZeroMemory,ADDR [edi].UserName,128
 				invoke closesocket,connfd
 				invoke UpdateClientList
+				pop edi
+				pop ecx
+				pop eax
 				.BREAK
 			.ENDIF
 		.ENDIF
@@ -225,7 +244,6 @@ HandleLogout PROC,connfd:DWORD
 		inc ecx
 	.ENDW
 	
-	@UNLOCK_SHARE_VAR
 	
 	ret
 
@@ -305,7 +323,7 @@ HandleRegister PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	ASSUME esi: PTR CLIENT_MSG
 	
 	invoke FindPassword,ADDR [esi].C_Target,ADDR [esi].C_Text
-	.IF eax == 0
+	.IF eax == -1
 		
 		invoke CreateFile,OFFSET FILE,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
 		mov @fileHandle,eax
@@ -319,9 +337,11 @@ HandleRegister PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 		invoke CloseHandle,@fileHandle
 		
+		invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET FRIENDPATH,ADDR [esi].C_Target
+		invoke CreateFile,OFFSET HD_STRINGBUFFER,GENERIC_READ or GENERIC_WRITE,0,NULL,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,NULL
+		invoke CloseHandle,eax
+		
 		invoke SendServerResponse,connfd,S_REGISTEROK,NULL
-		
-		
 	.ELSE
 		invoke SendServerResponse,connfd,S_REGERRUSEREXISTS,NULL
 	.ENDIF
@@ -329,7 +349,8 @@ HandleRegister PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	ret
 
 HandleRegister ENDP
-SendServerResponse      PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
+
+SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 
 	LOCAL @msg:SERVER_MSG
 	
@@ -408,12 +429,6 @@ FindPassword PROC, uname:PTR BYTE, password:PTR BYTE
     ; Close file handler
     invoke CloseHandle, @fileHandle
     
-    ;return 0 when the info file is empty
-    .IF @dataLen == 0
-        mov eax, 0
-        ret
-    .ENDIF
-
     ; Add '\0' to the end
     mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
     add eax, @dataLen

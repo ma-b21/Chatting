@@ -26,6 +26,7 @@ BTN_DOWNTEXT            db "START SERVER", 0
 
 ;------------------- BUFFER -----------------------
 USERFORM                db "User:%s|",0
+REGFORM                 db "User:%s|%s",0dh,0ah,0
 
 ;------------------ SOCKET -----------------------
 DEFAULT_PORT            equ 22910
@@ -34,7 +35,7 @@ MAX_CONNECT             equ 100
 ;------------------- STRING ----------------------
 FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
-
+FRIENDPATH              db '.\\FRIENDS\',0
 
 ;==================== DATA =====================
 .data
@@ -52,7 +53,7 @@ dhWnd                  	dd ?
 listhWnd               	dd ?
 btnhWnd                	dd ?
 
-hMutex             		dd ?
+hMutex             		HANDLE NULL
 
 serverListenfd          dd ?
 
@@ -67,7 +68,7 @@ StartServer     		PROTO,
 CommunicateWithClient   PROTO,
 	:DWORD	
 
-HandleRecvClientMsg           PROTO,
+HandleRecvClientMsg     PROTO,
 	:DWORD
 
 StopServer 				PROTO
@@ -83,9 +84,14 @@ HandleLogin     		PROTO,
 
 SendServerResponse      PROTO,
 	:DWORD,:DWORD,:PTR BYTE
-	
-UpdateClientList 		PROTO
 
+HandleLogout PROTO,
+	:DWORD	
+
+HandleRegister PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+UpdateClientList 		PROTO
 
 ;================= MACRO ==================
 @LOCK_SHARE_VAR         MACRO

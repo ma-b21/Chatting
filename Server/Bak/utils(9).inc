@@ -21,6 +21,7 @@ SERVER_MSG 		ENDS
 CLIENT 			STRUCT
 	Sockfd		dd ?
 	UserName    db 128  dup(0)
+	IsUsed		dd 0
 CLIENT 			ENDS
 
 
@@ -39,8 +40,8 @@ ERR_TITLE               db 'ERROR',0
 SOCKET_ERR          	db 'ERROR When Create Socket!', 0
 ERROR_CONNECT           db 'ERROR When Connect To Server!', 0
 debug                   db 'DEBUG', 0
+printint                db '%d',0
 MODE                    dd 1
-EMPTY_CLIENT            CLIENT <>
 
 ;==================== Function =====================
 
