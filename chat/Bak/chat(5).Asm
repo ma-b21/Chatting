@@ -263,8 +263,6 @@ SendLoginRequest  PROC
 	
 	invoke send,connfd,ADDR @login_msg,SIZEOF @login_msg,0
 	
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
-	
 	invoke recv,connfd,ADDR @recv_msg,SIZEOF @recv_msg,0
 	.IF @recv_msg.S_Sign == S_LOGINOK
 		invoke lstrcpy,OFFSET UserName,ADDR @login_msg.C_Target

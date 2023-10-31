@@ -198,6 +198,9 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		.ENDIF
 		
 	.ELSEIF eax==WM_CLOSE
+		.IF connfd != -1
+			invoke SendRequest,C_LOGOUT,NULL,NULL
+		.ENDIF
 		invoke DestroyWindow,hWin
 		invoke PostQuitMessage,NULL
 	.ELSE

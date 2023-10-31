@@ -61,7 +61,7 @@ Group=Assembly,Resources,Misc
 7=2
 8=3
 [AutoLoad]
-AutoLoad=1,2,5,1001,6,8
+AutoLoad=1,2,5,1001,6,8,4
 [RADebugBP]
 2=
 3=
@@ -111,12 +111,12 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=137869015
+PTimer=138319889
 [Size]
 4=0,0,0,0
 2=0,0,0,0,4152
 3=0,0,0,0,20
-1=0,0,0,0,70
+1=0,0,0,0,7466
 5=0,0,0,0
 1001=0,0,0,0,27
 6=0,0,0,0,313
@@ -124,7 +124,7 @@ PTimer=137869015
 [Collapse]
 2=4
 3=
-1=2147362428,47
+1=2147354236,47
 1001=32
 6=
 [GroupExpand]
