@@ -53,9 +53,33 @@ Login						PROTO ,
 LoginProc					PROTO ,
 	:DWORD,:DWORD,:DWORD,:DWORD
 
+;----------------------------------------------
+; LoginProc:Handle Add Dialog Message
+;     args1:hWin:HWND,
+;     args2:uMsg:UINT,
+;     args3:wParam:WPARAM,
+;     args4:lParam:LPARAM
+;     ret:0 if the message handled successfully
+;----------------------------------------------
+AddProc 					PROTO ,
+	:DWORD,:DWORD,:DWORD,:DWORD
+
+;----------------------------------------------
+; SendRequest:Send request to Server
+;     args1:sign:DWORD,
+;	  args2:target:PTR BYTE,
+;	  args3:text:PTR BYTE
+;     ret:0 if the message handled successfully
+;----------------------------------------------
 SendRequest PROTO,
 	:DWORD,:PTR BYTE,:PTR BYTE
 
+;----------------------------------------------
+; SendLoginRequest:Send login request to Server
+;     args:None
+;     ret:1 if the message handled successfully,
+;		  otherwise return 0
+;----------------------------------------------
 SendLoginRequest    		PROTO 
 
 SendRegisterRequest 		PROTO
@@ -79,6 +103,10 @@ IDC_MSENDBOX        equ 1009
 IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
+
+IDD_ADD             equ 1013
+IDC_FRIENDNAME      equ 1015
+IDC_ADDBTN          equ 1016
 
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
@@ -131,6 +159,8 @@ TP_WRONGPASSWD     		db 'Wrong password! Please retry!',0
 TP_REGISTERSUCCESS      db 'Register Success! Please Login!', 0
 TP_LOGINFAILED          db 'Login Failed, Please register first!', 0
 TP_SERVERSTOP           db 'The Server Stop, Client will close!',0
+TP_UNAMEBLANK           db 'The Username Cannot be Blank!',0
+TP_PASSWDBLANK          db 'The Password Cannot be Blank!',0
 
 .data
 
@@ -148,6 +178,10 @@ sendhWnd				dd ?
 sendBtnhWnd				dd ?
 listhWnd				dd ?
 addBtnhWnd 				dd ?
+
+AddhWnd					dd ?
+frNamehWnd              dd ?
+addSearchhWnd           dd ?
 
 FRIENDLIST 				FRIEND 100 dup(<>)
 

@@ -25,7 +25,7 @@ CLIENT 			STRUCT
 CLIENT 			ENDS
 
 FRIEND          STRUCT
-	itemIndex   dd 0
+	itemIndex   dd -1
 	uname       db 128  dup(0)
 FRIEND 			ENDS
 

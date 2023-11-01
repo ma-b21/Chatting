@@ -40,7 +40,7 @@ ERR_TITLE               db 'ERROR',0
 SOCKET_ERR          	db 'ERROR When Create Socket!', 0
 ERROR_CONNECT           db 'ERROR When Connect To Server!', 0
 debug                   db 'DEBUG', 0
-printint                db '%d',0
+printint                db 'num:%d|',0
 MODE                    dd 1
 
 ;==================== Function =====================

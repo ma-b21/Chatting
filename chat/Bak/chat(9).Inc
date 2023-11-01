@@ -53,6 +53,9 @@ Login						PROTO ,
 LoginProc					PROTO ,
 	:DWORD,:DWORD,:DWORD,:DWORD
 
+AddProc 					PROTO ,
+	:DWORD,:DWORD,:DWORD,:DWORD
+
 SendRequest PROTO,
 	:DWORD,:PTR BYTE,:PTR BYTE
 
@@ -63,6 +66,8 @@ SendRegisterRequest 		PROTO
 CommunicateWithServer   	PROTO
 
 HandleRecvServerMsg      	PROTO
+
+UpdateFriendList			PROTO
 
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
@@ -78,6 +83,10 @@ IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
 
+IDD_ADD             equ 1013
+IDC_FRIENDNAME      equ 1015
+IDC_ADDBTN          equ 1016
+
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
 
@@ -90,6 +99,11 @@ DEFAULT_PORT        equ 22910
 		invoke ConnectSocketForClient,DEFAULT_PORT, ADDR DEFAULT_IP
 		mov connfd,eax
 	.ENDIF
+ENDM
+
+@CloseSocket	MACRO
+	invoke closesocket,connfd
+	mov connfd,-1
 ENDM
 
 .const
@@ -124,6 +138,8 @@ TP_WRONGPASSWD     		db 'Wrong password! Please retry!',0
 TP_REGISTERSUCCESS      db 'Register Success! Please Login!', 0
 TP_LOGINFAILED          db 'Login Failed, Please register first!', 0
 TP_SERVERSTOP           db 'The Server Stop, Client will close!',0
+TP_UNAMEBLANK           db 'The Username Cannot be Blank!',0
+TP_PASSWDBLANK           db 'The Password Cannot be Blank!',0
 
 .data
 
@@ -142,6 +158,11 @@ sendBtnhWnd				dd ?
 listhWnd				dd ?
 addBtnhWnd 				dd ?
 
+AddhWnd					dd ?
+frNamehWnd              dd ?
+addSearchhWnd           dd ?
+
+FRIENDLIST 				FRIEND 100 dup(<>)
 
 connfd 					dd -1
 LOGINFLAG               dd 0

@@ -11,6 +11,7 @@ CreateSocketForServer		PROC, port:DWORD
 	invoke socket,AF_INET, SOCK_STREAM, IPPROTO_TCP
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		mov eax,-1
 		ret
 	.ENDIF
 	mov @listenfd, eax
@@ -25,6 +26,7 @@ CreateSocketForServer		PROC, port:DWORD
 	invoke bind,@listenfd,ADDR @addr,SIZEOF @addr
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		mov eax,-1
 		ret
 	.ENDIF
 	

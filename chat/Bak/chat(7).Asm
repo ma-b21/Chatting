@@ -262,6 +262,7 @@ SendLoginRequest  PROC
 	invoke SendMessage,PasshWnd,WM_GETTEXT,128,ADDR @login_msg.C_Text
 	
 	invoke send,connfd,ADDR @login_msg,SIZEOF @login_msg,0
+	
 	invoke recv,connfd,ADDR @recv_msg,SIZEOF @recv_msg,0
 	.IF @recv_msg.S_Sign == S_LOGINOK
 		invoke lstrcpy,OFFSET UserName,ADDR @login_msg.C_Target

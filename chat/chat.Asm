@@ -246,8 +246,7 @@ SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 	invoke lstrcpy,ADDR @msg.C_Text,text
 	
 	invoke send,connfd,ADDR @msg,TYPE CLIENT_MSG,0
-	.IF eax == -1
-	.endif
+	mov eax,0
 	ret
 
 SendRequest ENDP

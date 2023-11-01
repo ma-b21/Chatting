@@ -55,14 +55,13 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 	invoke inet_addr,ip
 	mov @addr.sin_addr,eax
 	
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
-	
 	invoke connect,@connfd,ADDR @addr,SIZEOF @addr
-	.IF eax == -1
+	.IF eax < 0
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
 		ret
 	.ENDIF
 	
+	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
 	mov eax,@connfd
 	ret
 

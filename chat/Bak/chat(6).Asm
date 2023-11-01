@@ -261,9 +261,16 @@ SendLoginRequest  PROC
 	invoke SendMessage,UserhWnd,WM_GETTEXT,128,ADDR @login_msg.C_Target
 	invoke SendMessage,PasshWnd,WM_GETTEXT,128,ADDR @login_msg.C_Text
 	
-	invoke send,connfd,ADDR @login_msg,SIZEOF @login_msg,0
+	invoke lstrlen,ADDR @login_msg.C_Target
+	.IF eax == 0
+		ret
+	.ENDIF
+	invoke lstrlen,ADDR @login_msg.C_Text
+	.IF eax == 0
+		ret
+	.ENDIF
 	
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
+	invoke send,connfd,ADDR @login_msg,SIZEOF @login_msg,0
 	
 	invoke recv,connfd,ADDR @recv_msg,SIZEOF @recv_msg,0
 	.IF @recv_msg.S_Sign == S_LOGINOK

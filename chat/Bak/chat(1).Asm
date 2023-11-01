@@ -246,8 +246,6 @@ SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 	invoke lstrcpy,ADDR @msg.C_Text,text
 	
 	invoke send,connfd,ADDR @msg,TYPE CLIENT_MSG,0
-	.IF eax == -1
-	.endif
 	ret
 
 SendRequest ENDP
@@ -304,13 +302,13 @@ SendRegisterRequest PROC
 	invoke SendMessage,UserhWnd,WM_GETTEXT,128,ADDR @reg_msg.C_Target
 	invoke SendMessage,PasshWnd,WM_GETTEXT,128,ADDR @reg_msg.C_Text
 	
-	invoke lstrlen,ADDR @login_msg.C_Target
+	invoke lstrlen,ADDR @reg_msg.C_Target
 	.IF eax == 0
 		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK
 		mov eax,0
 		ret
 	.ENDIF
-	invoke lstrlen,ADDR @login_msg.C_Text
+	invoke lstrlen,ADDR @reg_msg.C_Text
 	.IF eax == 0
 		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK
 		mov eax,0

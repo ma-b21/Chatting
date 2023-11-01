@@ -29,6 +29,7 @@ CLIENT 			ENDS
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
+C_LOGOUT                equ 805h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h

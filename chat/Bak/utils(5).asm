@@ -61,7 +61,6 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 		ret
 	.ENDIF
 	
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
 	mov eax,@connfd
 	ret
 

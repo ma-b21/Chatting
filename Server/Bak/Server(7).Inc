@@ -35,7 +35,8 @@ MAX_CONNECT             equ 100
 ;------------------- STRING ----------------------
 FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
-FRIENDPATH              db '.\\FRIENDS\',0
+FRIENDPATH              db '.\\FRIENDS\%s',0
+TESTSS                  db '1,1,'
 
 ;==================== DATA =====================
 .data

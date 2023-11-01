@@ -304,6 +304,19 @@ SendRegisterRequest PROC
 	invoke SendMessage,UserhWnd,WM_GETTEXT,128,ADDR @reg_msg.C_Target
 	invoke SendMessage,PasshWnd,WM_GETTEXT,128,ADDR @reg_msg.C_Text
 	
+	invoke lstrlen,ADDR @reg_msg.C_Target
+	.IF eax == 0
+		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK
+		mov eax,0
+		ret
+	.ENDIF
+	invoke lstrlen,ADDR @reg_msg.C_Text
+	.IF eax == 0
+		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK
+		mov eax,0
+		ret
+	.ENDIF
+	
 	invoke send,connfd,ADDR @reg_msg,SIZEOF @reg_msg,0
 	invoke recv,connfd,ADDR @recv_msg,SIZEOF @recv_msg,0
 	.IF @recv_msg.S_Sign == S_REGISTEROK

@@ -8,6 +8,50 @@ includelib user32.lib
 includelib Comctl32.lib
 includelib shell32.lib
 
+;=================== FUNCTION ====================
+
+DlgProc					PROTO,
+	:HWND,:UINT,:WPARAM,:LPARAM
+
+StartServer     		PROTO,
+	:DWORD
+
+CommunicateWithClient   PROTO,
+	:DWORD	
+
+HandleRecvClientMsg     PROTO,
+	:DWORD
+
+StopServer 				PROTO
+
+FindPassword 			PROTO,
+	:PTR BYTE,:PTR BYTE
+
+FindString 				PROTO,
+	:DWORD,:DWORD
+	
+HandleLogin     		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+SendServerResponse      PROTO,
+	:DWORD,:DWORD,:PTR BYTE
+
+HandleLogout 			PROTO,
+	:DWORD	
+
+HandleRegister 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+UpdateClientList 		PROTO
+
+;================= MACRO ==================
+@LOCK_SHARE_VAR         MACRO
+	invoke WaitForSingleObject, hMutex, INFINITE
+ENDM
+
+@UNLOCK_SHARE_VAR      	MACRO
+	invoke ReleaseMutex, hMutex
+ENDM
 ;=================== CONST ====================
 .const
 ;------------------- SKIN ------------------------
@@ -37,7 +81,6 @@ MAX_CONNECT             equ 100
 ;------------------- STRING ----------------------
 FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
-TESTSS                  db '1,1,'
 
 ;==================== DATA =====================
 .data
@@ -58,50 +101,5 @@ btnhWnd                	dd ?
 hMutex             		HANDLE NULL
 
 serverListenfd          dd ?
-
-;=================== FUNCTION ====================
-
-DlgProc					PROTO,
-	:HWND,:UINT,:WPARAM,:LPARAM
-
-StartServer     		PROTO,
-	:DWORD
-
-CommunicateWithClient   PROTO,
-	:DWORD	
-
-HandleRecvClientMsg     PROTO,
-	:DWORD
-
-StopServer 				PROTO
-
-FindPassword 			PROTO,
-	:PTR BYTE,:PTR BYTE
-
-FindString 				PROTO,
-	:DWORD,:DWORD
-	
-HandleLogin     		PROTO,
-	:DWORD,:PTR CLIENT_MSG
-
-SendServerResponse      PROTO,
-	:DWORD,:DWORD,:PTR BYTE
-
-HandleLogout PROTO,
-	:DWORD	
-
-HandleRegister PROTO,
-	:DWORD,:PTR CLIENT_MSG
-
-UpdateClientList 		PROTO
-
-;================= MACRO ==================
-@LOCK_SHARE_VAR         MACRO
-	invoke WaitForSingleObject, hMutex, INFINITE
-ENDM
-
-@UNLOCK_SHARE_VAR      	MACRO
-	invoke ReleaseMutex, hMutex
-ENDM
 
 ENDIF

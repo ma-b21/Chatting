@@ -43,6 +43,7 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 	invoke socket,AF_INET, SOCK_STREAM,IPPROTO_TCP
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		mov eax,-1
 		ret
 	.ENDIF
 	mov @connfd, eax
@@ -58,6 +59,7 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 	invoke connect,@connfd,ADDR @addr,SIZEOF @addr
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		mov eax,-1
 		ret
 	.ENDIF
 	

@@ -53,17 +53,62 @@ Login						PROTO ,
 LoginProc					PROTO ,
 	:DWORD,:DWORD,:DWORD,:DWORD
 
+;----------------------------------------------
+; LoginProc:Handle Add Dialog Message
+;     args1:hWin:HWND,
+;     args2:uMsg:UINT,
+;     args3:wParam:WPARAM,
+;     args4:lParam:LPARAM
+;     ret:0 if the message handled successfully
+;----------------------------------------------
+AddProc 					PROTO ,
+	:DWORD,:DWORD,:DWORD,:DWORD
+
+;----------------------------------------------
+; SendRequest:Send request to Server
+;     args1:sign:DWORD,
+;	  args2:target:PTR BYTE,
+;	  args3:text:PTR BYTE
+;     ret:0 if the message handled successfully
+;----------------------------------------------
 SendRequest PROTO,
 	:DWORD,:PTR BYTE,:PTR BYTE
 
+;----------------------------------------------
+; SendLoginRequest:Send login request to Server
+;     args:None
+;     ret:1 if login successfully,
+;		  otherwise return 0
+;----------------------------------------------
 SendLoginRequest    		PROTO 
 
+;----------------------------------------------
+; SendRegisterRequest:Send register request to Server
+;     args:None
+;     ret:1 if register successfully,
+;		  otherwise return 0
+;----------------------------------------------
 SendRegisterRequest 		PROTO
 
+;----------------------------------------------
+; CommunicateWithServer:Listen SERVER_MSG from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 CommunicateWithServer   	PROTO
 
+;----------------------------------------------
+; HandleRecvServerMsg:Handle SERVER_MSG from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 HandleRecvServerMsg      	PROTO
 
+;----------------------------------------------
+; UpdateFriendList:Get friendlist from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 UpdateFriendList			PROTO
 
 ;==================	MACRO =================
@@ -111,7 +156,6 @@ SkinName				db	"asus.she",0
 
 ;------------------- DLL ------------------------
 RichEditDll				db	"RichEd20.dll",0
-VideoDll                db  "quartz.dll",0
 
 ;------------------ WINDOW ----------------------
 LoginClassName			db 'LOGINCLASS',0
@@ -120,10 +164,6 @@ dlgName					db 'Login',0
 mainName                db 'Client',0
 
 ;------------------ STRING ----------------------
-INFOPREFIX              db 'User:',0        
-FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
-CONNECTOR               db '|', 0
-LINEBREAK               db 0dh,0ah, 0
 
 ;------------------ SOCKET ---------------------- 
 DEFAULT_IP              db '127.0.0.1', 0
@@ -135,6 +175,8 @@ TP_WRONGPASSWD     		db 'Wrong password! Please retry!',0
 TP_REGISTERSUCCESS      db 'Register Success! Please Login!', 0
 TP_LOGINFAILED          db 'Login Failed, Please register first!', 0
 TP_SERVERSTOP           db 'The Server Stop, Client will close!',0
+TP_UNAMEBLANK           db 'The Username Cannot be Blank!',0
+TP_PASSWDBLANK          db 'The Password Cannot be Blank!',0
 
 .data
 
@@ -155,7 +197,7 @@ addBtnhWnd 				dd ?
 
 AddhWnd					dd ?
 frNamehWnd              dd ?
-addBtnhWnd              dd ?
+addSearchhWnd           dd ?
 
 FRIENDLIST 				FRIEND 100 dup(<>)
 

@@ -35,6 +35,7 @@ C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
+C_ADDFRIEND             equ 811h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
