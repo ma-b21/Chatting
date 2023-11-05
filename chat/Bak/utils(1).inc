@@ -8,16 +8,21 @@ includelib 		ws2_32.lib
 
 ;==================== Function =====================
 ;----------------------------------------------
-; MainWinProc:Handle Main Window Message
-;     args1:hWin:HWND,
-;     args2:uMsg:UINT,
-;     args3:wParam:WPARAM,
-;     args4:lParam:LPARAM
-;     ret:0 if the message handled successfully
+; CreateSocketForServer:
+;     args1:port:DWORD
+;     ret:the listenfd if the socket created and bind successfully,
+;		  otherwise return -1
 ;----------------------------------------------
 CreateSocketForServer		PROTO,
 	:DWORD
 
+;----------------------------------------------
+; CreateSocketForServer:
+;     args1:port:DWORD
+;	  args2:ip:PTR BYTE
+;     ret: the connected socket to ip:port,
+;		   otherwise return -1
+;----------------------------------------------
 ConnectSocketForClient       PROTO,
 	:DWORD,:PTR BYTE
 ;=================== STRUCTURE ===================
@@ -45,6 +50,7 @@ C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
 C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -54,7 +60,10 @@ S_LOGERRNOUSER          equ 806h
 S_REGISTEROK            equ 807h
 S_REGERRUSEREXISTS      equ 808h
 S_SERVERSTOP            equ 809h
-
+S_ADDERRNOUSER          equ 812h
+S_ADDOK					equ 813h
+S_ADDFRIENDEXISTS       equ 814h
+S_UAREADDED             equ 815h
 
 ;===================== CONST =======================
 .const

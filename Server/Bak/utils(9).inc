@@ -6,6 +6,25 @@ include 		ws2_32.inc
 includelib 		masm32.lib
 includelib 		ws2_32.lib
 
+;==================== Function =====================
+;----------------------------------------------
+; CreateSocketForServer:
+;     args1:port:DWORD
+;     ret:the listenfd if the socket created and bind successfully,
+;		  otherwise return -1
+;----------------------------------------------
+CreateSocketForServer		PROTO,
+	:DWORD
+
+;----------------------------------------------
+; CreateSocketForServer:
+;     args1:port:DWORD
+;	  args2:ip:PTR BYTE
+;     ret: the connected socket to ip:port,
+;		   otherwise return -1
+;----------------------------------------------
+ConnectSocketForClient       PROTO,
+	:DWORD,:PTR BYTE
 ;=================== STRUCTURE ===================
 CLIENT_MSG    	STRUCT
 	C_Sign		dd ?
@@ -24,17 +43,23 @@ CLIENT 			STRUCT
 	IsUsed		dd 0
 CLIENT 			ENDS
 
-
 ;===================== MACRRO ======================
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
+C_GETFRIEND             equ 810h
+C_ADDFRIEND             equ 811h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
 S_LOGERRPASSWD          equ 803h
 S_LOGERRLOGED			equ 804h
+S_LOGERRNOUSER          equ 806h
+S_REGISTEROK            equ 807h
+S_REGERRUSEREXISTS      equ 808h
+S_SERVERSTOP            equ 809h
+S_ADDERRNOUSER          equ 812h
 
 
 ;===================== CONST =======================
@@ -45,13 +70,5 @@ ERROR_CONNECT           db 'ERROR When Connect To Server!', 0
 debug                   db 'DEBUG', 0
 printint                db 'num:%d|',0
 MODE                    dd 1
-
-;==================== Function =====================
-
-CreateSocketForServer		PROTO,
-	:DWORD
-
-ConnectSocketForClient       PROTO,
-	:DWORD,:PTR BYTE
 
 ENDIF

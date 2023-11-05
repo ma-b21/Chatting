@@ -6,6 +6,20 @@ include 		ws2_32.inc
 includelib 		masm32.lib
 includelib 		ws2_32.lib
 
+;==================== Function =====================
+;----------------------------------------------
+; MainWinProc:Handle Main Window Message
+;     args1:hWin:HWND,
+;     args2:uMsg:UINT,
+;     args3:wParam:WPARAM,
+;     args4:lParam:LPARAM
+;     ret:0 if the message handled successfully
+;----------------------------------------------
+CreateSocketForServer		PROTO,
+	:DWORD
+
+ConnectSocketForClient       PROTO,
+	:DWORD,:PTR BYTE
 ;=================== STRUCTURE ===================
 CLIENT_MSG    	STRUCT
 	C_Sign		dd ?
@@ -24,12 +38,13 @@ CLIENT 			STRUCT
 	IsUsed		dd 0
 CLIENT 			ENDS
 
-
 ;===================== MACRRO ======================
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
+C_GETFRIEND             equ 810h
+C_ADDFRIEND             equ 811h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -38,6 +53,7 @@ S_LOGERRLOGED			equ 804h
 S_LOGERRNOUSER          equ 806h
 S_REGISTEROK            equ 807h
 S_REGERRUSEREXISTS      equ 808h
+S_SERVERSTOP            equ 809h
 
 
 ;===================== CONST =======================
@@ -48,13 +64,5 @@ ERROR_CONNECT           db 'ERROR When Connect To Server!', 0
 debug                   db 'DEBUG', 0
 printint                db 'num:%d|',0
 MODE                    dd 1
-
-;==================== Function =====================
-
-CreateSocketForServer		PROTO,
-	:DWORD
-
-ConnectSocketForClient       PROTO,
-	:DWORD,:PTR BYTE
 
 ENDIF
