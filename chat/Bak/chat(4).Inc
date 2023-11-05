@@ -111,6 +111,21 @@ HandleRecvServerMsg      	PROTO
 ;----------------------------------------------
 UpdateFriendList			PROTO
 
+;----------------------------------------------
+; GetChatHistory:Get chat history from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
+GetChatHistory 				PROTO
+
+;----------------------------------------------
+; UpdateChatHistory:Update chat history in chatbox 
+;     args:msg:PTR BYTE
+;     ret:None
+;----------------------------------------------
+UpdateChatHistory 			PROTO,
+	:PTR BYTE
+
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
 IDC_LUNAME          equ 1002

@@ -127,6 +127,15 @@ HandleSendMsg 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleHistory:handle message from client to get chat history through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleHistory 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; UpdateClientList:update the CLIENTLIST
 ;	  args:None
 ;	  ret:None

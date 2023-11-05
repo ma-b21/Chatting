@@ -120,7 +120,10 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke SendMessage,sendhWnd,WM_GETTEXT,8192,OFFSET textBuffer
 			
 			invoke SendRequest,C_SENDMSG,ADDR @targetName,OFFSET textBuffer
-			invoke GetChatHistory
+			
+			invoke Sleep,50
+			
+			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
 			invoke SendMessage,sendhWnd,WM_SETTEXT,0,OFFSET TP_NULL
 		.ELSEIF eax == IDC_MFRIENDLIST
 			mov eax,wParam

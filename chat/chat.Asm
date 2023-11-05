@@ -70,6 +70,7 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 	
 	LOCAL @selectItem:DWORD
 	LOCAL @targetName[128]:BYTE
+	LOCAL @hicon:HICON
 	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
@@ -102,6 +103,13 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		
 		;set timer to get history
 		;invoke SetTimer,MainhWnd,ID_TIMER,100,OFFSET GetChatHistory
+	
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		mov eax,wParam
 		and eax,lower
@@ -193,6 +201,9 @@ Login PROC ,hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 Login ENDP
 
 LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
+
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		push	hWin
@@ -208,6 +219,13 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov UserhWnd, eax
 		invoke GetDlgItem,LoginhWnd,IDC_LPASSWD
 		mov PasshWnd, eax
+		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		
 		mov eax, wParam

@@ -121,6 +121,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			
 			invoke SendRequest,C_SENDMSG,ADDR @targetName,OFFSET textBuffer
 			
+			invoke Sleep,50
+			
 			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
 			invoke SendMessage,sendhWnd,WM_SETTEXT,0,OFFSET TP_NULL
 		.ELSEIF eax == IDC_MFRIENDLIST
@@ -269,7 +271,7 @@ AddProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke lstrcmp,OFFSET UserName,ADDR @FriendName
 			.IF eax == 0
 				invoke DestroyWindow,hWin
-				invoke MessageBox,MainhWnd,OFFSET TP_CANTADDSELF,OFFSET mainName,MB_OK
+				invoke MessageBox,MainhWnd,OFFSET TP_CANTADDSELF,OFFSET mainName,MB_OK or MB_APPLMODAL
 				invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
 				xor eax,eax
 				ret
@@ -316,13 +318,13 @@ SendLoginRequest  PROC
 	
 	invoke lstrlen,ADDR @login_msg.C_Target
 	.IF eax == 0
-		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 		ret
 	.ENDIF
 	invoke lstrlen,ADDR @login_msg.C_Text
 	.IF eax == 0
-		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 		ret
 	.ENDIF
@@ -335,13 +337,13 @@ SendLoginRequest  PROC
 		invoke lstrcpy,OFFSET PassWord,ADDR @login_msg.C_Text
 		mov eax,1
 	.ELSEIF @recv_msg.S_Sign == S_LOGERRLOGED
-		invoke MessageBox,LoginhWnd,OFFSET TP_ALREADYLOGIN,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_ALREADYLOGIN,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 	.ELSEIF @recv_msg.S_Sign == S_LOGERRPASSWD
-		invoke MessageBox,LoginhWnd,OFFSET TP_WRONGPASSWD,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_WRONGPASSWD,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 	.ELSEIF @recv_msg.S_Sign == S_LOGERRNOUSER
-		invoke MessageBox,LoginhWnd,OFFSET TP_LOGINFAILED,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_LOGINFAILED,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 	.ENDIF
 	ret
@@ -359,13 +361,13 @@ SendRegisterRequest PROC
 	
 	invoke lstrlen,ADDR @reg_msg.C_Target
 	.IF eax == 0
-		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_UNAMEBLANK,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 		ret
 	.ENDIF
 	invoke lstrlen,ADDR @reg_msg.C_Text
 	.IF eax == 0
-		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_PASSWDBLANK,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 		ret
 	.ENDIF
@@ -373,10 +375,10 @@ SendRegisterRequest PROC
 	invoke send,connfd,ADDR @reg_msg,SIZEOF @reg_msg,0
 	invoke recv,connfd,ADDR @recv_msg,SIZEOF @recv_msg,0
 	.IF @recv_msg.S_Sign == S_REGISTEROK
-		invoke MessageBox,LoginhWnd,OFFSET TP_REGISTERSUCCESS,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_REGISTERSUCCESS,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,1
 	.ELSEIF @recv_msg.S_Sign == S_REGERRUSEREXISTS
-		invoke MessageBox,LoginhWnd,OFFSET TP_REGISTERED,OFFSET dlgName,MB_OK
+		invoke MessageBox,LoginhWnd,OFFSET TP_REGISTERED,OFFSET dlgName,MB_OK or MB_APPLMODAL
 		mov eax,0
 	.ENDIF
 	ret
@@ -418,20 +420,20 @@ HandleRecvServerMsg  PROC
 	invoke recv, connfd, ADDR @server_msg, SIZEOF @server_msg, 0
 	.IF eax != SOCKET_ERROR 
 		.IF @server_msg.S_Sign == S_SERVERSTOP
-			invoke MessageBox,MainhWnd,OFFSET TP_SERVERSTOP,OFFSET mainName,MB_OK
+			invoke MessageBox,MainhWnd,OFFSET TP_SERVERSTOP,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke SendMessage,MainhWnd,WM_CLOSE,NULL,NULL
 			invoke SendMessage,MainhWnd,WM_DESTROY,NULL,NULL
 		.ELSEIF @server_msg.S_Sign == S_ADDERRNOUSER
-			invoke MessageBox,MainhWnd,OFFSET TP_ADDUSERNOTEXISTS,OFFSET mainName,MB_OK
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDUSERNOTEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
 		.ELSEIF @server_msg.S_Sign == S_ADDOK
-			invoke MessageBox,MainhWnd,OFFSET TP_ADDSUCCESS,OFFSET mainName,MB_OK
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke UpdateFriendList
 		.ELSEIF @server_msg.S_Sign == S_ADDFRIENDEXISTS
-			invoke MessageBox,MainhWnd,OFFSET TP_FRIENDEXISTS,OFFSET mainName,MB_OK
+			invoke MessageBox,MainhWnd,OFFSET TP_FRIENDEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
 		.ELSEIF @server_msg.S_Sign == S_UAREADDED
-			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke UpdateFriendList
 		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG
 			invoke UpdateChatHistory,ADDR @server_msg.S_Text

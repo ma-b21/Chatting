@@ -161,6 +161,7 @@ SkinName				db	"asus.she",0
 IDD_DIALOG1				equ 1100
 IDC_LIST            	equ 1101
 IDC_BUTTON          	equ 1102
+IDI_ICON				equ 1103
 
 ;------------------ BUTTON -----------------------
 BTN_UPTEXT              db "STOP SERVER", 0

@@ -167,7 +167,7 @@ mainName                db 'Client',0
 DEFAULT_IP              db '127.0.0.1', 0
 
 ;------------------ BUFFER ----------------------
-textBuffer              db 8192 dup(0)
+textBuffer              db 8192 dup(?)
 
 ;------------------- TIPS -----------------------
 TP_ALREADYLOGIN			db 'The user is already login!',0

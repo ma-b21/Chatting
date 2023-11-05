@@ -510,14 +510,16 @@ GetChatHistory PROC
 GetChatHistory ENDP
 
 UpdateChatHistory PROC, msg:PTR BYTE
-
-    LOCAL @content:EDITSTREAM
-    LOCAL @dataLen:DWORD
 	
-	invoke MessageBox,NULL,OFFSET debug,NULL,NULL
+	LOCAL @dataLen:DWORD
 
-	invoke SendMessage,chathWnd,EM_SETSEL,0,-1
-	invoke SendMessage,chathWnd,EM_REPLACESEL,TRUE,msg
+	invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
+
+	invoke GetWindowTextLength,chathWnd
+	mov @dataLen,eax
+	invoke SendMessage,chathWnd,EM_SETSEL,@dataLen,@dataLen
+	invoke SendMessage,chathWnd,EM_SCROLL,SB_BOTTOM,0
+	
     ret
 
 UpdateChatHistory ENDP

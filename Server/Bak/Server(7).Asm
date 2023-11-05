@@ -230,6 +230,8 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		invoke HandleAddFriend, connfd, esi
     	.ELSEIF [esi].C_Sign == C_SENDMSG
     		invoke HandleSendMsg,connfd,esi
+    	.ELSEIF [esi].C_Sign == C_GETHISTORY
+    		invoke HandleHistory,connfd,esi
 		.ENDIF
 	.ENDIF
 
@@ -496,7 +498,9 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	LOCAL @source[128]:BYTE
 	LOCAL @fileHandle:DWORD
 	LOCAL @dataLen:DWORD
+	LOCAL @targetSocket:DWORD
 	
+	mov @targetSocket,-1
 	mov  esi,msg
 	ASSUME esi: PTR CLIENT_MSG
 	
@@ -511,7 +515,11 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 				
 		.IF eax == [edi].Sockfd
 			invoke lstrcpy,ADDR @source,ADDR [edi].UserName
-			.BREAK
+		.ENDIF
+		
+		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
+		.IF eax == 0
+			mov @targetSocket, [edi].Sockfd
 		.ENDIF
 				
 		pop ecx
@@ -551,10 +559,44 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 	invoke CloseHandle,@fileHandle
 	
+	;forward message
+	
+	
 	ASSUME esi:nothing
 	ret
 
 HandleSendMsg ENDP
+
+HandleHistory PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+
+	LOCAL @fileHandle:DWORD
+	LOCAL @dataLen:DWORD
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+	;Get history filename
+	invoke wsprintf,OFFSET BUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Target,ADDR [esi].C_Text
+	
+	invoke CreateFile, OFFSET BUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    ; Save the file handle
+    mov @fileHandle, eax 
+
+    ; Read file contents
+    invoke ReadFile, @fileHandle, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+    ; Close file handler
+    invoke CloseHandle, @fileHandle
+    
+    ; Add '\0' to the end
+    mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
+    add eax, @dataLen
+    mov BYTE PTR [eax], 0
+    
+    invoke SendServerResponse,connfd,S_FORWARDMSG,OFFSET READFILEBUFFER
+	
+	ASSUME esi:nothing
+	ret
+
+HandleHistory ENDP
 
 SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 

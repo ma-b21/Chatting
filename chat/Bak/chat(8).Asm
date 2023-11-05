@@ -120,7 +120,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke SendMessage,sendhWnd,WM_GETTEXT,8192,OFFSET textBuffer
 			
 			invoke SendRequest,C_SENDMSG,ADDR @targetName,OFFSET textBuffer
-			invoke GetChatHistory
+			
+			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
 			invoke SendMessage,sendhWnd,WM_SETTEXT,0,OFFSET TP_NULL
 		.ELSEIF eax == IDC_MFRIENDLIST
 			mov eax,wParam
@@ -510,8 +511,16 @@ GetChatHistory PROC
 GetChatHistory ENDP
 
 UpdateChatHistory PROC, msg:PTR BYTE
+	
+	LOCAL @dataLen:DWORD
 
-    invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
+	invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
+
+	invoke GetWindowTextLength,chathWnd
+	mov @dataLen,eax
+	invoke SendMessage,chathWnd,EM_SETSEL,@dataLen,@dataLen
+	invoke SendMessage,chathWnd,EM_SCROLL,SB_BOTTOM,0
+	
     ret
 
 UpdateChatHistory ENDP

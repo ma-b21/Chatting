@@ -163,7 +163,8 @@ NEWFRIEND               db '%s,',0
 SEARCHFRIEND            db '.\\FRIENDS\\*.*',0
 CHATHISTORYDIR          db '.\\CHATHISTORY\\%s',0
 CHATHISTORY             db '.\\CHATHISTORY\\%s\\%s',0 
-ADDEDASFRIEND           db 'You are added as friend of %s',0 
+ADDEDASFRIEND           db 'You are added as friend of %s',0
+SENTENCE                db '%s',0dh,0ah,'%s',0 
 
 ;==================== DATA =====================
 .data

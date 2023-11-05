@@ -118,6 +118,15 @@ HandleAddFriend 		PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleSendMsg:handle message from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendMsg 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; UpdateClientList:update the CLIENTLIST
 ;	  args:None
 ;	  ret:None

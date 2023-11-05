@@ -177,6 +177,8 @@ TP_UNAMEBLANK           db 'The Username Cannot be Blank!',0
 TP_PASSWDBLANK          db 'The Password Cannot be Blank!',0
 TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
 TP_ADDSUCCESS           db 'Add Friend Success',0
+TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
+TP_FRIENDEXISTS         db 'That friend is already exists',0
 
 .data
 

@@ -145,6 +145,7 @@ IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
 ID_TIMER            equ 1017
+IDI_ICON            equ 1018
 
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000

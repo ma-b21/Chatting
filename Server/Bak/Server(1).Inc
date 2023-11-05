@@ -172,7 +172,7 @@ DEFAULT_PORT            equ 22910
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
-FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
+FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0
 REGFORM                 db "User:%s|%s",0dh,0ah,0

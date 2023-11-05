@@ -176,11 +176,11 @@ FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0
 REGFORM                 db "User:%s|%s",0dh,0ah,0
-FRIENDPATH              db '.\\FRIENDS\\%s',0
+FRIENDPATH              db '.\\config\\FRIENDS\\%s',0
 NEWFRIEND               db '%s,',0
-SEARCHFRIEND            db '.\\FRIENDS\\*.*',0
-CHATHISTORYDIR          db '.\\CHATHISTORY\\%s',0
-CHATHISTORY             db '.\\CHATHISTORY\\%s\\%s',0 
+SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
+CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
+CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
 SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
 

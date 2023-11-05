@@ -197,7 +197,7 @@ TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
 TP_ADDSUCCESS           db 'Add Friend Success',0
 TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
 TP_FRIENDEXISTS         db 'That friend is already exists',0
-TP_NULL                 db dup(0)
+TP_NULL                 db 0,0
 .data
 
 hInstance				dd ?      		 	;handle of process

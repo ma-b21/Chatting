@@ -6,6 +6,7 @@ Backup=$P\Bak\
 Group=1
 GroupExpand=1
 Debug=0
+Res.rc=1
 [Files]
 1=chat.Asm
 2=chat.Inc
@@ -16,6 +17,7 @@ Debug=0
 6=utils.inc
 7=utils.obj
 8=addFriend.dlg
+9=
 [MakeFiles]
 0=chat.rap
 1=chat.rc
@@ -47,6 +49,7 @@ Menu=1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0
 16=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
 17=0,0,"$E\OllyDbg",5
 [Resource]
+1=IDI_ICON,1018,2,CHAT.ico
 [StringTable]
 [VerInf]
 [Group]
@@ -60,8 +63,9 @@ Group=Assembly,Resources,Misc
 6=2
 7=2
 8=3
+9=
 [AutoLoad]
-AutoLoad=1,2,5,1001,6,8,4
+AutoLoad=Dec: 0 Bin: 00000000
 [RADebugBP]
 2=
 3=
@@ -111,20 +115,21 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=179183717
+PTimer=180971748
 [Size]
 4=0,0,0,0
-2=0,0,0,0,6146
-3=0,0,0,0,20
-1=0,0,0,0,11215
+2=0,0,0,0,4427
+3=0,0,0,0,25
+1=0,0,0,0,5175
 5=0,0,0,0
 1001=0,0,0,0,27
 6=0,0,0,0,2174
 8=0,0,0,0
+9=
 [Collapse]
 2=4
 3=
-1=2112814845,3847
+1=1039072893,3974
 1001=32
 6=
 [GroupExpand]

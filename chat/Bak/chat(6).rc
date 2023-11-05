@@ -1,2 +1,2 @@
-#include "Res/mainDlg.rc"
+#include "Res/chatMnu.rc"
 #include "Res/loginDlg.rc"

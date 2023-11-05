@@ -23,6 +23,8 @@ start:
 
 DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		;init the handles
@@ -48,6 +50,12 @@ DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		
 		mov SERVER_STATE, 0
 		invoke SetWindowText,btnhWnd,OFFSET BTN_DOWNTEXT
+		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
 		
 	.ELSEIF eax == WM_COMMAND
 		mov eax, wParam
@@ -519,7 +527,8 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
 		.IF eax == 0
-			mov @targetSocket, [edi].Sockfd
+			push [edi].Sockfd
+			pop @targetSocket 
 		.ENDIF
 				
 		pop ecx
@@ -561,6 +570,24 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	
 	;forward message
 	
+	.IF @targetSocket != -1
+		invoke CreateFile, OFFSET BUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    	; Save the file handle
+    	mov @fileHandle, eax 
+
+    	; Read file contents
+    	invoke ReadFile, @fileHandle, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+    	; Close file handler
+    	invoke CloseHandle, @fileHandle
+    
+    	; Add '\0' to the end
+    	mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
+    	add eax, @dataLen
+    	mov BYTE PTR [eax], 0
+    	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
+    
+    	invoke SendServerResponse,connfd,S_FORWARDMSG,OFFSET READFILEBUFFER
+	.ENDIF
 	
 	ASSUME esi:nothing
 	ret

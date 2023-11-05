@@ -166,6 +166,7 @@ mainName                db 'Client',0
 ;------------------ SOCKET ---------------------- 
 DEFAULT_IP              db '127.0.0.1', 0
 
+;------------------ BUFFER ----------------------
 ;------------------- TIPS -----------------------
 TP_ALREADYLOGIN			db 'The user is already login!',0
 TP_REGISTERED           db 'The user is already registered, please login!', 0

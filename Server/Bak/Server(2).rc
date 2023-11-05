@@ -1,2 +1,1 @@
-#include "Res/ServerRes.rc"
 #include "Res/ServerDlg.rc"

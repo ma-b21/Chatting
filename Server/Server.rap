@@ -6,6 +6,7 @@ Backup=$P\Bak\
 Group=1
 GroupExpand=1
 Debug=0
+Res.rc=1
 [Files]
 1=Server.Asm
 2=Server.Inc
@@ -51,6 +52,7 @@ Menu=1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0
 16=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
 17=0,0,"$E\OllyDbg",5
 [Resource]
+1=IDI_ICON,1103,2,server.ico
 [StringTable]
 [VerInf]
 [Group]
@@ -114,7 +116,7 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=137988235
+PTimer=138002564
 [Collapse]
 5=
 1=2147426108,2147475455,1

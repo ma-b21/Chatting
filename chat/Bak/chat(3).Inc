@@ -144,6 +144,8 @@ IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
+ID_TIMER            equ 1017
+
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
 
