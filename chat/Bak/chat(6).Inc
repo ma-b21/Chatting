@@ -90,10 +90,25 @@ SendLoginRequest    		PROTO
 ;----------------------------------------------
 SendRegisterRequest 		PROTO
 
+;----------------------------------------------
+; CommunicateWithServer:Listen SERVER_MSG from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 CommunicateWithServer   	PROTO
 
+;----------------------------------------------
+; HandleRecvServerMsg:Handle SERVER_MSG from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 HandleRecvServerMsg      	PROTO
 
+;----------------------------------------------
+; UpdateFriendList:Get friendlist from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
 UpdateFriendList			PROTO
 
 ;==================	MACRO =================
@@ -141,19 +156,12 @@ SkinName				db	"asus.she",0
 
 ;------------------- DLL ------------------------
 RichEditDll				db	"RichEd20.dll",0
-VideoDll                db  "quartz.dll",0
 
 ;------------------ WINDOW ----------------------
 LoginClassName			db 'LOGINCLASS',0
 MainClassName           db 'MAINWINCLASS',0
 dlgName					db 'Login',0
 mainName                db 'Client',0
-
-;------------------ STRING ----------------------
-INFOPREFIX              db 'User:',0        
-FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
-CONNECTOR               db '|', 0
-LINEBREAK               db 0dh,0ah, 0
 
 ;------------------ SOCKET ---------------------- 
 DEFAULT_IP              db '127.0.0.1', 0
@@ -170,33 +178,28 @@ TP_PASSWDBLANK          db 'The Password Cannot be Blank!',0
 
 .data
 
-hInstance				dd ?
-hRichEditDll            dd ?
-CommandLine				dd ?
+hInstance				dd ?      		 	;handle of process
+hRichEditDll            dd ?     		  	;dll handle
+CommandLine				dd ?     		  	;command handle
+	
+LoginhWnd				dd ?      		 	;login window handle
+UserhWnd                dd ?      		 	;username input
+PasshWnd                dd ?				;password input
 
-LoginhWnd				dd ?
-UserhWnd                dd ?
-PasshWnd                dd ?
+MainhWnd                dd ?				;main window handle
+chathWnd                dd ?  				;chat history box handle
+sendhWnd				dd ?				;send box handle
+sendBtnhWnd				dd ?				;send button handle
+listhWnd				dd ?				;friend list handle
+addBtnhWnd 				dd ?				;add friend button handle
 
-MainhWnd                dd ?
-chathWnd                dd ?
-sendhWnd				dd ?
-sendBtnhWnd				dd ?
-listhWnd				dd ?
-addBtnhWnd 				dd ?
+AddhWnd					dd ?				;add window handle
+frNamehWnd              dd ?				;friend name input
+addSearchhWnd           dd ?				;add button handle
 
-AddhWnd					dd ?
-frNamehWnd              dd ?
-addSearchhWnd           dd ?
-
-FRIENDLIST 				FRIEND 100 dup(<>)
-
-connfd 					dd -1
-LOGINFLAG               dd 0
-ReadBuffer              db 1024 dup(0), 0
-WriteBuffer             db 1024 dup(0), 0
+connfd 					dd -1				;connect socket
+LOGINFLAG               dd 0				;if login open main window
+;ReadBuffer              db 1024 dup(0), 0	
+;WriteBuffer             db 1024 dup(0), 0
 UserName                db 128 dup(0), 0
 PassWord                db 128 dup(0), 0
-
-errcode                 dd ?
-errmessage              db 128 dup(0)

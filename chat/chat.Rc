@@ -1,3 +1,5 @@
+#include "Res/newFriendDlg.rc"
 #include "Res/addFriendDlg.rc"
 #include "Res/clientDlg.rc"
 #include "Res/loginDlg.rc"
+#include "Res/newFriendFlg.rc"

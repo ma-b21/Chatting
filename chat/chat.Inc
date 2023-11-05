@@ -124,10 +124,13 @@ IDC_MSENDBOX        equ 1009
 IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
+IDC_NEWFRIENDBTN    equ 1020
 
 IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
+
+IDD_ACCEPT			equ 1021
 
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
@@ -192,10 +195,13 @@ sendhWnd				dd ?				;send box handle
 sendBtnhWnd				dd ?				;send button handle
 listhWnd				dd ?				;friend list handle
 addBtnhWnd 				dd ?				;add friend button handle
+newBtnhWnd				dd ?				;new friend button handle
 
 AddhWnd					dd ?				;add window handle
 frNamehWnd              dd ?				;friend name input
 addSearchhWnd           dd ?				;add button handle
+
+AcceptWnd				dd ?				;accept new friend window  handle
 
 connfd 					dd -1				;connect socket
 LOGINFLAG               dd 0				;if login open main window

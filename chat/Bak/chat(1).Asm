@@ -92,6 +92,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov listhWnd, eax
 		invoke GetDlgItem,MainhWnd,IDC_MADDFRIENDBTN
 		mov addBtnhWnd, eax
+		invoke GetDlgItem,MainhWnd,IDC_NEWFRIENDBTN
+		mov newBtnhWnd, eax
 		
 		;get friend list
 		invoke UpdateFriendList
@@ -246,6 +248,7 @@ SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 	invoke lstrcpy,ADDR @msg.C_Text,text
 	
 	invoke send,connfd,ADDR @msg,TYPE CLIENT_MSG,0
+	mov eax,0
 	ret
 
 SendRequest ENDP

@@ -92,6 +92,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov listhWnd, eax
 		invoke GetDlgItem,MainhWnd,IDC_MADDFRIENDBTN
 		mov addBtnhWnd, eax
+		invoke GetDlgItem,MainhWnd,IDC_NEWFRIENDBTN
+		mov newBtnhWnd, eax
 		
 		;get friend list
 		invoke UpdateFriendList
@@ -103,6 +105,11 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke InitCommonControls
 			invoke DialogBoxParam,hInstance,IDD_ADD,NULL,OFFSET AddProc,NULL
 		.ENDIF
+	.ELSEIF eax == WM_COMMAND
+		mov eax,wParam
+		
+		.IF eax == IDC_NEWFRIENDBTN
+		.endif
 		
 	.ELSEIF eax == WM_CLOSE
 		invoke SendRequest,C_LOGOUT,NULL,NULL
