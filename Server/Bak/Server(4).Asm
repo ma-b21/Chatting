@@ -131,7 +131,6 @@ StopServer PROC
 StopServer ENDP
 
 CommunicateWithClient   PROC, connfd:DWORD
-
 	LOCAL @sockfdSet:fd_set
 	LOCAL @timeout: timeval
 	LOCAL @msg:CLIENT_MSG
@@ -142,9 +141,35 @@ CommunicateWithClient   PROC, connfd:DWORD
     mov    @timeout.tv_sec, 0
     mov    @timeout.tv_usec, 200*1000
 
-	.WHILE SERVER_STATE != 0
+	.WHILE TRUE
+    	invoke ioctlsocket, connfd, FIONREAD, ADDR @bytesAvailable
+    	.IF eax == SOCKET_ERROR
+    		
+        	@LOCK_SHARE_VAR
+        	
+        	mov edi,OFFSET CLIENTLIST
+			ASSUME edi:PTR CLIENT
+			mov ecx,0
+			.WHILE ecx < MAX_CONNECT
+				.IF [edi].IsUsed != 0
+					mov eax,[edi].Sockfd
+					.IF connfd == eax
+						mov [edi].IsUsed,0
+						invoke RtlZeroMemory,ADDR [edi].UserName,128
+						invoke closesocket,connfd
+						invoke UpdateClientList
+						.BREAK
+					.ENDIF
+				.ENDIF
+				add edi,TYPE CLIENT
+				inc ecx
+			.ENDW
+			
+			@UNLOCK_SHARE_VAR
+        	.BREAK
+    	.ENDIF
+    	
 		invoke select, 0, ADDR @sockfdSet, NULL, NULL, ADDR @timeout
-		
         .IF eax == 0
             .CONTINUE
         .ENDIF
@@ -164,9 +189,6 @@ HandleRecvClientMsg     PROC, connfd:DWORD
 	
 	invoke RtlZeroMemory, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER
 	invoke recv, connfd, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER, 0
-	push eax
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
-	pop eax
 	
 	mov esi, OFFSET READSOCKETBUFFER
 	ASSUME esi: PTR CLIENT_MSG
@@ -204,6 +226,8 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		add eax, @dataLen
     		mov BYTE PTR [eax], 0
     		invoke SendServerResponse,connfd,0,OFFSET READFILEBUFFER
+    	.ELSEIF [esi].C_Sign == C_ADDFRIEND
+    		invoke HandleAddFriend, connfd, esi
 		.ENDIF
 	.ENDIF
 
@@ -345,6 +369,23 @@ HandleRegister PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	ret
 
 HandleRegister ENDP
+
+HandleAddFriend PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+	LOCAL @findData:WIN32_FIND_DATA
+	LOCAL @hFind:HANDLE
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+
+	invoke FindFirstFile,OFFSET SEARCHFRIEND,ADDR @findData
+	mov @hFind,eax
+	
+	.WHILE
+
+	ASSUME esi:nothing
+	ret
+
+HandleLogin ENDP
 
 SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 

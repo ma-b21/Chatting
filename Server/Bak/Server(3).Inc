@@ -8,6 +8,130 @@ includelib user32.lib
 includelib Comctl32.lib
 includelib shell32.lib
 
+;=================== FUNCTION ====================
+;----------------------------------------------
+; DlgProc: Handle the event message
+;     args1:hWin:HWND,
+;	  args2:uMsg:UINT,
+;	  args3:wParam:WPARAM,
+;	  args4:lParam:LPARAM
+;     ret:0
+;----------------------------------------------
+DlgProc					PROTO,
+	:HWND,:UINT,:WPARAM,:LPARAM
+
+;----------------------------------------------
+; StartServer: Start server at 0.0.0.0:port
+;     args1:port:DWORD
+;     ret:0
+;----------------------------------------------
+StartServer     		PROTO,
+	:DWORD
+
+;----------------------------------------------
+; CommunicateWithClient:Listen CLIENT_MSG from Client through connfd 
+;     args:connfd:DWORD
+;     ret:None
+;----------------------------------------------
+CommunicateWithClient   PROTO,
+	:DWORD	
+
+;----------------------------------------------
+; HandleRecvClientMsg:Handle CLIENT_MSG from clinet 
+;     args:connfd:DWORD
+;     ret:None
+;----------------------------------------------
+HandleRecvClientMsg     PROTO,
+	:DWORD
+
+;----------------------------------------------
+; StopServer:Stop server and send message to all clients to close 
+;     args:None
+;     ret:None
+;----------------------------------------------
+StopServer 				PROTO
+
+;----------------------------------------------
+; FindPassword PROC, 
+;	  args1:uname:PTR BYTE, 
+;	  args2:password:PTR BYTE
+;	  ret:(-1, NO USER NAMED uname)
+;         (0, PASSWORD incorrect)
+;		  (1, PASSWORD correct)
+;----------------------------------------------
+FindPassword 			PROTO,
+	:PTR BYTE,:PTR BYTE
+	
+;----------------------------------------------
+; FindString:like strstr
+;	  args1:sourceString:DWORD, 
+;	  args2:searchString:DWORD
+;	  ret:(0, searchString not in source String)
+;		  (The address of the first occurrence of the searchString in the sourceString )
+;----------------------------------------------
+FindString 				PROTO,
+	:DWORD,:DWORD
+
+;----------------------------------------------
+; HandleLogin:handle login message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleLogin     		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; SendServerResponse:Send response through connfd,With S_sign sign and S_Text text
+;	  args1:connfd:DWORD,
+;	  args2:sign:DWORD,
+;	  args3:text:PTR BYTE
+;	  ret:None
+;----------------------------------------------
+SendServerResponse      PROTO,
+	:DWORD,:DWORD,:PTR BYTE
+
+;----------------------------------------------
+; HandleLogout:When receive Logout request delete the client in CLIENTLIST
+;	  args1:connfd:DWORD,
+;	  ret:None
+;----------------------------------------------
+HandleLogout 			PROTO,
+	:DWORD	
+
+;----------------------------------------------
+; HandleRegister:handle register message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleRegister 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleAddFriend:handle add friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleAddFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; UpdateClientList:update the CLIENTLIST
+;	  args:None
+;	  ret:None
+;----------------------------------------------
+UpdateClientList 		PROTO
+
+;================= MACRO ==================
+@LOCK_SHARE_VAR         MACRO
+	invoke WaitForSingleObject, hMutex, INFINITE
+ENDM
+
+@UNLOCK_SHARE_VAR      	MACRO
+	invoke ReleaseMutex, hMutex
+ENDM
 ;=================== CONST ====================
 .const
 ;------------------- SKIN ------------------------
@@ -57,50 +181,5 @@ btnhWnd                	dd ?
 hMutex             		HANDLE NULL
 
 serverListenfd          dd ?
-
-;=================== FUNCTION ====================
-
-DlgProc					PROTO,
-	:HWND,:UINT,:WPARAM,:LPARAM
-
-StartServer     		PROTO,
-	:DWORD
-
-CommunicateWithClient   PROTO,
-	:DWORD	
-
-HandleRecvClientMsg     PROTO,
-	:DWORD
-
-StopServer 				PROTO
-
-FindPassword 			PROTO,
-	:PTR BYTE,:PTR BYTE
-
-FindString 				PROTO,
-	:DWORD,:DWORD
-	
-HandleLogin     		PROTO,
-	:DWORD,:PTR CLIENT_MSG
-
-SendServerResponse      PROTO,
-	:DWORD,:DWORD,:PTR BYTE
-
-HandleLogout PROTO,
-	:DWORD	
-
-HandleRegister PROTO,
-	:DWORD,:PTR CLIENT_MSG
-
-UpdateClientList 		PROTO
-
-;================= MACRO ==================
-@LOCK_SHARE_VAR         MACRO
-	invoke WaitForSingleObject, hMutex, INFINITE
-ENDM
-
-@UNLOCK_SHARE_VAR      	MACRO
-	invoke ReleaseMutex, hMutex
-ENDM
 
 ENDIF

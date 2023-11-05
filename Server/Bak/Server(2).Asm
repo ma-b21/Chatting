@@ -131,7 +131,6 @@ StopServer PROC
 StopServer ENDP
 
 CommunicateWithClient   PROC, connfd:DWORD
-
 	LOCAL @sockfdSet:fd_set
 	LOCAL @timeout: timeval
 	LOCAL @msg:CLIENT_MSG
@@ -142,8 +141,8 @@ CommunicateWithClient   PROC, connfd:DWORD
     mov    @timeout.tv_sec, 0
     mov    @timeout.tv_usec, 200*1000
 
-	.WHILE SERVER_STATE != 0
-		invoke ioctlsocket, connfd, FIONREAD, ADDR @bytesAvailable
+	.WHILE TRUE
+    	invoke ioctlsocket, connfd, FIONREAD, ADDR @bytesAvailable
     	.IF eax == SOCKET_ERROR
     		
         	@LOCK_SHARE_VAR
@@ -169,15 +168,10 @@ CommunicateWithClient   PROC, connfd:DWORD
 			@UNLOCK_SHARE_VAR
         	.BREAK
     	.ENDIF
-	
+    	
 		invoke select, 0, ADDR @sockfdSet, NULL, NULL, ADDR @timeout
-		
         .IF eax == 0
             .CONTINUE
-        .ENDIF
-        
-        .IF eax == SOCKET_ERROR
-        	.BREAK
         .ENDIF
         
         invoke HandleRecvClientMsg,connfd
@@ -195,9 +189,6 @@ HandleRecvClientMsg     PROC, connfd:DWORD
 	
 	invoke RtlZeroMemory, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER
 	invoke recv, connfd, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER, 0
-	push eax
-	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
-	pop eax
 	
 	mov esi, OFFSET READSOCKETBUFFER
 	ASSUME esi: PTR CLIENT_MSG
@@ -235,6 +226,8 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		add eax, @dataLen
     		mov BYTE PTR [eax], 0
     		invoke SendServerResponse,connfd,0,OFFSET READFILEBUFFER
+    	.ELSEIF [esi].C_Sign == C_ADDFRIEND
+    		invoke HandleAddFriend, connfd, esi
 		.ENDIF
 	.ENDIF
 
@@ -376,6 +369,40 @@ HandleRegister PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	ret
 
 HandleRegister ENDP
+
+HandleAddFriend PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+	LOCAL @findData:WIN32_FIND_DATA
+	LOCAL @hFind:HANDLE
+	LOCAL @isUerExists
+	
+	mov @isUserExists,0
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+
+	invoke FindFirstFile,OFFSET SEARCHFRIEND,ADDR @findData
+	mov @hFind,eax
+	mov eax,0
+	.REPEAT
+		mov ebx,@findData.dwFileAttributes
+		and ebx,FILE_ATTRIBUTE_DIRECTORY
+		
+		.IF ebx == 0
+			invoke lstrcmp,@findData.cFileName,[esi].C_Text
+			.IF eax == 0
+				mov @isUserExists,1
+				.BREAK
+			.ENDIF
+		.ENDIF
+		
+		invoke FindNextFile,@hFind,ADDR findData
+	.UNTIL eax == 0
+
+	
+	ASSUME esi:nothing
+	ret
+
+HandleLogin ENDP
 
 SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 

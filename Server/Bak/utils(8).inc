@@ -29,11 +29,13 @@ CLIENT 			ENDS
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
+C_LOGOUT                equ 805h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
 S_LOGERRPASSWD          equ 803h
 S_LOGERRLOGED			equ 804h
+S_LOGERRNOUSER          equ 806h
 
 
 ;===================== CONST =======================

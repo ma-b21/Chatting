@@ -35,6 +35,9 @@ C_LOGOUT                equ 805h
 S_LOGINOK               equ 802h
 S_LOGERRPASSWD          equ 803h
 S_LOGERRLOGED			equ 804h
+S_LOGERRNOUSER          equ 806h
+S_REGISTEROK            equ 807h
+S_REGERRUSEREXISTS      equ 808h
 
 
 ;===================== CONST =======================

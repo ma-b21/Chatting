@@ -24,12 +24,17 @@ CLIENT 			STRUCT
 	IsUsed		dd 0
 CLIENT 			ENDS
 
+FRIEND          STRUCT
+	itemIndex   dd 0
+	uname       db 128  dup(0)
+FRIEND 			ENDS
 
 ;===================== MACRRO ======================
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
+C_GETFRIEND             equ 810h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -38,6 +43,7 @@ S_LOGERRLOGED			equ 804h
 S_LOGERRNOUSER          equ 806h
 S_REGISTEROK            equ 807h
 S_REGERRUSEREXISTS      equ 808h
+S_SERVERSTOP            equ 809h
 
 
 ;===================== CONST =======================

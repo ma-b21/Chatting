@@ -63,7 +63,7 @@ Group=Assembly,Resources,Misc
 6=2
 1001=2
 [AutoLoad]
-AutoLoad=4,1,2,1001,5
+AutoLoad=1,2
 [RADebugBP]
 2=
 1=
@@ -81,7 +81,7 @@ MilestoneOnTime=2
 MilestoneOnDate=0
 MilestoneOnDateWhen=1
 MilestoneOnDateStatus=0
-MilestoneOnDateDate=31
+MilestoneOnDateDate=1
 MilestoneOnDateTimeYear=2023
 MilestoneOnDateTimeMonth=10
 MilestoneOnDateTimeDate=29
@@ -114,17 +114,17 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=96958126
+PTimer=100060016
 [Collapse]
 5=
-1=606052252,516736
+1=610262972,516737
 2=
 6=
 1001=
 [Size]
 5=0,0,0,0,1956
-1=0,0,0,0,2228
-2=0,0,0,0,1151
+1=0,0,0,0,8301
+2=0,0,0,0,2459
 4=0,0,0,0
 6=0,0,0,0,763
 1001=0,0,0,0,0
@@ -144,9 +144,11 @@ GroupExpand=0,1,1,0
 [BreakPoint]
 0=
 [Find]
-1="OFFSET debug"
-2="@UNLOCK_SHARE_VAR"
-3="@LOCK_SHARE_VAR"
-4="createthread"
-5="UserForm"
-6="RtlZeroMemory"
+1="NEWFRIEND"
+2="C_ADDFRIEND"
+3="OFFSET debug"
+4="@UNLOCK_SHARE_VAR"
+5="@LOCK_SHARE_VAR"
+6="createthread"
+7="UserForm"
+8="RtlZeroMemory"

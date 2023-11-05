@@ -143,10 +143,41 @@ CommunicateWithClient   PROC, connfd:DWORD
     mov    @timeout.tv_usec, 200*1000
 
 	.WHILE SERVER_STATE != 0
+		invoke ioctlsocket, connfd, FIONREAD, ADDR @bytesAvailable
+    	.IF eax == SOCKET_ERROR
+    		
+        	@LOCK_SHARE_VAR
+        	
+        	mov edi,OFFSET CLIENTLIST
+			ASSUME edi:PTR CLIENT
+			mov ecx,0
+			.WHILE ecx < MAX_CONNECT
+				.IF [edi].IsUsed != 0
+					mov eax,[edi].Sockfd
+					.IF connfd == eax
+						mov [edi].IsUsed,0
+						invoke RtlZeroMemory,ADDR [edi].UserName,128
+						invoke closesocket,connfd
+						invoke UpdateClientList
+						.BREAK
+					.ENDIF
+				.ENDIF
+				add edi,TYPE CLIENT
+				inc ecx
+			.ENDW
+			
+			@UNLOCK_SHARE_VAR
+        	.BREAK
+    	.ENDIF
+	
 		invoke select, 0, ADDR @sockfdSet, NULL, NULL, ADDR @timeout
 		
         .IF eax == 0
             .CONTINUE
+        .ENDIF
+        
+        .IF eax == SOCKET_ERROR
+        	.BREAK
         .ENDIF
         
         invoke HandleRecvClientMsg,connfd
@@ -164,6 +195,10 @@ HandleRecvClientMsg     PROC, connfd:DWORD
 	
 	invoke RtlZeroMemory, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER
 	invoke recv, connfd, OFFSET READSOCKETBUFFER, SIZEOF READSOCKETBUFFER, 0
+	push eax
+	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
+	pop eax
+	
 	mov esi, OFFSET READSOCKETBUFFER
 	ASSUME esi: PTR CLIENT_MSG
 	.IF eax != SOCKET_ERROR 
@@ -211,7 +246,6 @@ HandleRecvClientMsg           ENDP
 
 HandleLogout PROC,connfd:DWORD
 	
-	@LOCK_SHARE_VAR
     
     mov edi,OFFSET CLIENTLIST
 	ASSUME edi:PTR CLIENT
@@ -237,7 +271,6 @@ HandleLogout PROC,connfd:DWORD
 		inc ecx
 	.ENDW
 	
-	@UNLOCK_SHARE_VAR
 	
 	ret
 
@@ -299,10 +332,8 @@ HandleLogin PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 	.ELSEIF eax == 0
 		invoke SendServerResponse,connfd,S_LOGERRPASSWD,NULL
-		invoke closesocket,connfd
 	.ELSEIF eax == -1
 		invoke SendServerResponse,connfd,S_LOGERRNOUSER,NULL
-		invoke closesocket,connfd
 	.ENDIF
 
 	ASSUME esi:nothing
