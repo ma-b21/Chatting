@@ -1,2 +1,2 @@
 #define IDI_ICON						1103
-IDI_ICON				ICON      DISCARDABLE "server.ico"
+IDI_ICON				ICON      DISCARDABLE "Res/server.ico"

@@ -1,2 +1,2 @@
 #define IDI_ICON						1018
-IDI_ICON				ICON      DISCARDABLE "CHAT.ico"
+IDI_ICON				ICON      DISCARDABLE "Res/CHAT.ico"

@@ -52,7 +52,7 @@ Menu=1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0
 16=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
 17=0,0,"$E\OllyDbg",5
 [Resource]
-1=IDI_ICON,1103,2,server.ico
+1=IDI_ICON,1103,2,Res\server.ico
 [StringTable]
 [VerInf]
 [Group]
@@ -83,7 +83,7 @@ MilestoneOnTime=2
 MilestoneOnDate=0
 MilestoneOnDateWhen=1
 MilestoneOnDateStatus=0
-MilestoneOnDateDate=5
+MilestoneOnDateDate=6
 MilestoneOnDateTimeYear=2023
 MilestoneOnDateTimeMonth=10
 MilestoneOnDateTimeDate=29
@@ -116,17 +116,17 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=138002564
+PTimer=139327939
 [Collapse]
 5=
-1=2147426108,2147475455,1
+1=2146975548,1073741823,1
 2=
 6=
 1001=
 [Size]
 5=0,0,0,0,1250
-1=0,0,1055,477,11994
-2=0,0,1055,477,5094
+1=0,0,1055,477,14218
+2=0,0,1055,477,4766
 4=0,0,0,0
 6=0,0,0,0,763
 1001=0,0,0,0,0

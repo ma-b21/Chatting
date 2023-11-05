@@ -49,7 +49,7 @@ Menu=1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0
 16=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
 17=0,0,"$E\OllyDbg",5
 [Resource]
-1=IDI_ICON,1018,2,CHAT.ico
+1=IDI_ICON,1018,2,Res\CHAT.ico
 [StringTable]
 [VerInf]
 [Group]
@@ -65,7 +65,7 @@ Group=Assembly,Resources,Misc
 8=3
 9=
 [AutoLoad]
-AutoLoad=Dec: 0 Bin: 00000000
+AutoLoad=
 [RADebugBP]
 2=
 3=
@@ -82,7 +82,7 @@ MilestoneOnTime=2
 MilestoneOnDate=0
 MilestoneOnDateWhen=1
 MilestoneOnDateStatus=0
-MilestoneOnDateDate=5
+MilestoneOnDateDate=6
 MilestoneOnDateTimeYear=2023
 MilestoneOnDateTimeMonth=10
 MilestoneOnDateTimeDate=28
@@ -115,12 +115,12 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
-PTimer=180971748
+PTimer=182146327
 [Size]
 4=0,0,0,0
 2=0,0,0,0,4427
 3=0,0,0,0,25
-1=0,0,0,0,5175
+1=0,0,0,0,11789
 5=0,0,0,0
 1001=0,0,0,0,27
 6=0,0,0,0,2174
@@ -129,7 +129,7 @@ PTimer=180971748
 [Collapse]
 2=4
 3=
-1=1039072893,3974
+1=1040186941,3974
 1001=32
 6=
 [GroupExpand]
