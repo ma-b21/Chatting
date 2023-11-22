@@ -163,6 +163,9 @@ Login PROC ,hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 Login ENDP
 
 LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
+
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		push	hWin
@@ -178,6 +181,13 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov UserhWnd, eax
 		invoke GetDlgItem,LoginhWnd,IDC_LPASSWD
 		mov PasshWnd, eax
+		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		
 		mov eax, wParam
@@ -236,6 +246,22 @@ AddProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 	ret
 
 AddProc ENDP
+
+DelFriend PROC
+
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	.IF eax == LB_ERR
+		ret
+	.ENDIF
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	invoke SendRequest,C_DELFRIEND,OFFSET UserName,ADDR @targetName
+	
+	ret
+DelFriend ENDP
 
 SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 
@@ -369,6 +395,29 @@ HandleRecvServerMsg  PROC
 			invoke MessageBox,MainhWnd,OFFSET TP_SERVERSTOP,OFFSET mainName,MB_OK
 			invoke SendMessage,MainhWnd,WM_CLOSE,NULL,NULL
 			invoke SendMessage,MainhWnd,WM_DESTROY,NULL,NULL
+<<<<<<< Updated upstream
+=======
+		.ELSEIF @server_msg.S_Sign == S_ADDERRNOUSER
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDUSERNOTEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
+		.ELSEIF @server_msg.S_Sign == S_ADDOK
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_ADDFRIENDEXISTS
+			invoke MessageBox,MainhWnd,OFFSET TP_FRIENDEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
+		.ELSEIF @server_msg.S_Sign == S_UAREADDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG
+			invoke UpdateChatHistory,ADDR @server_msg.S_Text
+		.ELSEIF @server_msg.S_Sign == S_DELOK
+			invoke MessageBox,MainhWnd,OFFSET TP_DELUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_UNFRIENDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+>>>>>>> Stashed changes
 		.ENDIF
 	.ENDIF
 	ret

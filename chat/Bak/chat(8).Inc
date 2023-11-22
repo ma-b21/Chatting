@@ -111,6 +111,21 @@ HandleRecvServerMsg      	PROTO
 ;----------------------------------------------
 UpdateFriendList			PROTO
 
+;----------------------------------------------
+; GetChatHistory:Get chat history from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
+GetChatHistory 				PROTO
+
+;----------------------------------------------
+; UpdateChatHistory:Update chat history in chatbox 
+;     args:msg:PTR BYTE
+;     ret:None
+;----------------------------------------------
+UpdateChatHistory 			PROTO,
+	:PTR BYTE
+
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
 IDC_LUNAME          equ 1002
@@ -166,6 +181,10 @@ mainName                db 'Client',0
 ;------------------ SOCKET ---------------------- 
 DEFAULT_IP              db '127.0.0.1', 0
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 ;------------------- TIPS -----------------------
 TP_ALREADYLOGIN			db 'The user is already login!',0
 TP_REGISTERED           db 'The user is already registered, please login!', 0
@@ -204,5 +223,10 @@ WriteBuffer             db 1024 dup(0), 0
 UserName                db 128 dup(0), 0
 PassWord                db 128 dup(0), 0
 
+<<<<<<< Updated upstream
 errcode                 dd ?
 errmessage              db 128 dup(0)
+=======
+;------------------ BUFFER ----------------------
+textBuffer              db 8192 dup(0), 0
+>>>>>>> Stashed changes

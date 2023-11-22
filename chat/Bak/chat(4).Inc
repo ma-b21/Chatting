@@ -129,6 +129,9 @@ IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
+ID_TIMER            equ 1017
+IDI_ICON            equ 1018
+
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
 
@@ -175,7 +178,15 @@ TP_LOGINFAILED          db 'Login Failed, Please register first!', 0
 TP_SERVERSTOP           db 'The Server Stop, Client will close!',0
 TP_UNAMEBLANK           db 'The Username Cannot be Blank!',0
 TP_PASSWDBLANK          db 'The Password Cannot be Blank!',0
+<<<<<<< Updated upstream
 
+=======
+TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
+TP_ADDSUCCESS           db 'Add Friend Success',0
+TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
+TP_FRIENDEXISTS         db 'That friend is already exists',0
+TP_NULL                 db 0,0
+>>>>>>> Stashed changes
 .data
 
 hInstance				dd ?      		 	;handle of process

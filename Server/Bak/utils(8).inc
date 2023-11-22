@@ -34,7 +34,18 @@ C_REGISTER        		equ 801h
 S_LOGINOK               equ 802h
 S_LOGERRPASSWD          equ 803h
 S_LOGERRLOGED			equ 804h
+<<<<<<< Updated upstream
 
+=======
+S_LOGERRNOUSER          equ 806h
+S_REGISTEROK            equ 807h
+S_REGERRUSEREXISTS      equ 808h
+S_SERVERSTOP            equ 809h
+S_ADDERRNOUSER          equ 812h
+S_ADDOK					equ 813h
+S_ADDFRIENDEXISTS       equ 814h
+S_UAREADDED             equ 815h
+>>>>>>> Stashed changes
 
 ;===================== CONST =======================
 .const

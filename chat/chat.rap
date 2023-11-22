@@ -63,7 +63,11 @@ Group=Assembly,Resources,Misc
 8=3
 9=3
 [AutoLoad]
+<<<<<<< Updated upstream
 AutoLoad=Dec: 76 Bin: 01001100
+=======
+AutoLoad=6,1,2,5
+>>>>>>> Stashed changes
 [RADebugBP]
 2=
 3=
@@ -80,7 +84,11 @@ MilestoneOnTime=2
 MilestoneOnDate=0
 MilestoneOnDateWhen=1
 MilestoneOnDateStatus=0
+<<<<<<< Updated upstream
 MilestoneOnDateDate=5
+=======
+MilestoneOnDateDate=22
+>>>>>>> Stashed changes
 MilestoneOnDateTimeYear=2023
 MilestoneOnDateTimeMonth=10
 MilestoneOnDateTimeDate=28
@@ -113,6 +121,7 @@ ProductVer4Range=0
 6=00FFFFFF
 7=00FFFFFF
 [PTimer]
+<<<<<<< Updated upstream
 PTimer=185483623
 [Size]
 4=0,0,0,0
@@ -122,13 +131,29 @@ PTimer=185483623
 5=0,0,0,0
 1001=0,0,0,0,27
 6=0,0,0,0,462
+=======
+PTimer=199443155
+[Size]
+4=0,0,0,0
+2=0,0,0,0,6055
+3=0,0,0,0,25
+1=0,0,0,0,13856
+5=0,0,0,0
+1001=0,0,0,0,27
+6=0,0,0,0,1316
+>>>>>>> Stashed changes
 8=0,0,0,0
 9=0,0,0,0
 [Collapse]
 2=4
 3=
+<<<<<<< Updated upstream
 1=1038623832,10
 1001=
+=======
+1=17694208,13312
+1001=32
+>>>>>>> Stashed changes
 6=
 [GroupExpand]
 GroupExpand=0,1,1,0
@@ -146,6 +171,7 @@ GroupExpand=0,1,1,0
 [BreakPoint]
 0=
 [Find]
+<<<<<<< Updated upstream
 1="offset debug"
 2="closesocket"
 3="GetStringLen"
@@ -156,3 +182,15 @@ GroupExpand=0,1,1,0
 8="endif"
 9="else"
 10="elseif"
+=======
+1="UpdateFriendList"
+2="C_GETFRIEND"
+3="MB_OK"
+4="TP_UNAMEBLANK"
+5="C_ADDFRIEND"
+6="offset debug"
+7="closesocket"
+8="GetStringLen"
+9="LoginClassName"
+10="MessageBox"
+>>>>>>> Stashed changes

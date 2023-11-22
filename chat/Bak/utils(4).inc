@@ -35,6 +35,11 @@ C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
+<<<<<<< Updated upstream
+=======
+C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
+>>>>>>> Stashed changes
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h

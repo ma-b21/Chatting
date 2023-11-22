@@ -6,6 +6,28 @@ include 		ws2_32.inc
 includelib 		masm32.lib
 includelib 		ws2_32.lib
 
+<<<<<<< Updated upstream
+=======
+;==================== Function =====================
+;----------------------------------------------
+; CreateSocketForServer:
+;     args1:port:DWORD
+;     ret:the listenfd if the socket created and bind successfully,
+;		  otherwise return -1
+;----------------------------------------------
+CreateSocketForServer		PROTO,
+	:DWORD
+
+;----------------------------------------------
+; CreateSocketForServer:
+;     args1:port:DWORD
+;	  args2:ip:PTR BYTE
+;     ret: the connected socket to ip:port,
+;		   otherwise return -1
+;----------------------------------------------
+ConnectSocketForClient       PROTO,
+	:DWORD,:PTR BYTE
+>>>>>>> Stashed changes
 ;=================== STRUCTURE ===================
 CLIENT_MSG    	STRUCT
 	C_Sign		dd ?
@@ -38,6 +60,13 @@ S_LOGERRLOGED			equ 804h
 S_LOGERRNOUSER          equ 806h
 S_REGISTEROK            equ 807h
 S_REGERRUSEREXISTS      equ 808h
+<<<<<<< Updated upstream
+=======
+S_SERVERSTOP            equ 809h
+S_ADDERRNOUSER          equ 812h
+S_ADDOK					equ 813h
+S_ADDFRIENDEXISTS       equ 814h
+>>>>>>> Stashed changes
 
 
 ;===================== CONST =======================

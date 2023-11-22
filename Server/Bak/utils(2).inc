@@ -35,6 +35,13 @@ C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
+<<<<<<< Updated upstream
+=======
+C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
+C_GETHISTORY            equ 818h
+C_DELFRIEND				equ 819h
+>>>>>>> Stashed changes
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -44,7 +51,16 @@ S_LOGERRNOUSER          equ 806h
 S_REGISTEROK            equ 807h
 S_REGERRUSEREXISTS      equ 808h
 S_SERVERSTOP            equ 809h
+<<<<<<< Updated upstream
 
+=======
+S_ADDERRNOUSER          equ 812h
+S_ADDOK					equ 813h
+S_ADDFRIENDEXISTS       equ 814h
+S_UAREADDED             equ 815h
+S_FORWARDMSG            equ 817h
+S_DELOK					
+>>>>>>> Stashed changes
 
 ;===================== CONST =======================
 .const

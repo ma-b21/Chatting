@@ -104,6 +104,35 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		.IF eax == IDC_MADDFRIENDBTN
 			invoke InitCommonControls
 			invoke DialogBoxParam,hInstance,IDD_ADD,NULL,OFFSET AddProc,NULL
+<<<<<<< Updated upstream
+=======
+		.ELSEIF eax == IDC_MDELFRIENDBTN
+			invoke DelFriend
+		.ELSEIF eax == IDC_MSENDBTN
+			invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+			.IF eax == LB_ERR
+				xor eax, eax
+				ret
+			.ENDIF
+			mov @selectItem,eax
+			invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+			invoke SendMessage,sendhWnd,WM_GETTEXT,8192,OFFSET textBuffer
+			
+			invoke SendRequest,C_SENDMSG,ADDR @targetName,OFFSET textBuffer
+			
+			invoke Sleep,50
+			
+			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
+			invoke SendMessage,sendhWnd,WM_SETTEXT,0,OFFSET TP_NULL
+		.ELSEIF eax == IDC_MFRIENDLIST
+			mov eax,wParam
+			and eax,higher
+			shr eax,16
+			.IF eax == LBN_SELCHANGE
+				invoke GetChatHistory
+			.ENDIF
+			
+>>>>>>> Stashed changes
 		.ENDIF
 	.ELSEIF eax == WM_COMMAND
 		mov eax,wParam
@@ -242,6 +271,22 @@ AddProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 
 AddProc ENDP
 
+DelFriend PROC
+
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	.IF eax == LB_ERR
+		ret
+	.ENDIF
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	invoke SendRequest,C_DELFRIEND,OFFSET UserName,ADDR @targetName
+	
+	ret
+DelFriend ENDP
+
 SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 
 	LOCAL @msg:CLIENT_MSG
@@ -374,6 +419,29 @@ HandleRecvServerMsg  PROC
 			invoke MessageBox,MainhWnd,OFFSET TP_SERVERSTOP,OFFSET mainName,MB_OK
 			invoke SendMessage,MainhWnd,WM_CLOSE,NULL,NULL
 			invoke SendMessage,MainhWnd,WM_DESTROY,NULL,NULL
+<<<<<<< Updated upstream
+=======
+		.ELSEIF @server_msg.S_Sign == S_ADDERRNOUSER
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDUSERNOTEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
+		.ELSEIF @server_msg.S_Sign == S_ADDOK
+			invoke MessageBox,MainhWnd,OFFSET TP_ADDSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_ADDFRIENDEXISTS
+			invoke MessageBox,MainhWnd,OFFSET TP_FRIENDEXISTS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke SendMessage,MainhWnd,WM_COMMAND,IDC_MADDFRIENDBTN,0
+		.ELSEIF @server_msg.S_Sign == S_UAREADDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG
+			invoke UpdateChatHistory,ADDR @server_msg.S_Text
+		.ELSEIF @server_msg.S_Sign == S_DELOK
+			invoke MessageBox,MainhWnd,OFFSET TP_DELSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_UNFRIENDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+>>>>>>> Stashed changes
 		.ENDIF
 	.ENDIF
 	ret

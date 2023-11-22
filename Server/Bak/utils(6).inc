@@ -9,6 +9,7 @@ includelib 		ws2_32.lib
 ;=================== STRUCTURE ===================
 CLIENT_MSG    	STRUCT
 	C_Sign		dd ?
+	C_Source    db 128  dup(0)
 	C_Target   	db 128  dup(0)
 	C_Text    	db 8192 dup(0)
 CLIENT_MSG 		ENDS
@@ -30,13 +31,29 @@ CLIENT 			ENDS
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
+<<<<<<< Updated upstream
+=======
+C_GETFRIEND             equ 810h
+C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
+>>>>>>> Stashed changes
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
 S_LOGERRPASSWD          equ 803h
 S_LOGERRLOGED			equ 804h
 S_LOGERRNOUSER          equ 806h
+<<<<<<< Updated upstream
 
+=======
+S_REGISTEROK            equ 807h
+S_REGERRUSEREXISTS      equ 808h
+S_SERVERSTOP            equ 809h
+S_ADDERRNOUSER          equ 812h
+S_ADDOK					equ 813h
+S_ADDFRIENDEXISTS       equ 814h
+S_UAREADDED             equ 815h
+>>>>>>> Stashed changes
 
 ;===================== CONST =======================
 .const

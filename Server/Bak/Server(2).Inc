@@ -42,6 +42,50 @@ HandleLogout 			PROTO,
 HandleRegister 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
+<<<<<<< Updated upstream
+=======
+;----------------------------------------------
+; HandleAddFriend:handle add friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleAddFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleDelFriend:handle del friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleDelFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleSendMsg:handle message from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendMsg 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleHistory:handle message from client to get chat history through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleHistory 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; UpdateClientList:update the CLIENTLIST
+;	  args:None
+;	  ret:None
+;----------------------------------------------
+>>>>>>> Stashed changes
 UpdateClientList 		PROTO
 
 ;================= MACRO ==================
@@ -63,6 +107,7 @@ SkinName				db	"asus.she",0
 IDD_DIALOG1				equ 1100
 IDC_LIST            	equ 1101
 IDC_BUTTON          	equ 1102
+IDI_ICON				equ 1103
 
 ;------------------ BUTTON -----------------------
 BTN_UPTEXT              db "STOP SERVER", 0
@@ -79,7 +124,7 @@ DEFAULT_PORT            equ 22910
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
-FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
+FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 
 ;==================== DATA =====================

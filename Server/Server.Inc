@@ -71,6 +71,17 @@ FindPassword 			PROTO,
 ;----------------------------------------------
 FindString 				PROTO,
 	:DWORD,:DWORD
+	
+;----------------------------------------------
+; FindPosition:
+;	  args1:sourceString:DWORD, 
+;	  args2:searchString:DWORD
+;	  ret:(0, searchString not in source String)
+;		  (The Position of the first occurrence of the searchString in the sourceString )
+;----------------------------------------------
+FindPosition 				PROTO,
+	:DWORD,:DWORD
+
 
 ;----------------------------------------------
 ; HandleLogin:handle login message from client through connfd
@@ -107,7 +118,47 @@ HandleLogout 			PROTO,
 ;----------------------------------------------
 HandleRegister 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
+<<<<<<< Updated upstream
 	
+=======
+
+;----------------------------------------------
+; HandleAddFriend:handle add friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleAddFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleDelFriend:handle del friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleDelFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleSendMsg:handle message from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendMsg 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleHistory:handle message from client to get chat history through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleHistory 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+>>>>>>> Stashed changes
 ;----------------------------------------------
 ; UpdateClientList:update the CLIENTLIST
 ;	  args:None
@@ -152,6 +203,19 @@ MAX_CONNECT             equ 100
 ;------------------- STRING ----------------------
 FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
+<<<<<<< Updated upstream
+=======
+USERFORM                db "User:%s|",0
+REGFORM                 db "User:%s|%s",0dh,0ah,0
+FRIENDPATH              db '.\\config\\FRIENDS\\%s',0
+NEWFRIEND               db '%s,',0
+SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
+CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
+CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
+ADDEDASFRIEND           db 'You are added as friend of %s',0
+UNFRIENDED				db 'You are unfriended by %s',0
+SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
+>>>>>>> Stashed changes
 
 ;==================== DATA =====================
 .data
