@@ -71,6 +71,17 @@ FindPassword 			PROTO,
 ;----------------------------------------------
 FindString 				PROTO,
 	:DWORD,:DWORD
+	
+;----------------------------------------------
+; FindPosition:
+;	  args1:sourceString:DWORD, 
+;	  args2:searchString:DWORD
+;	  ret:(0, searchString not in source String)
+;		  (The Position of the first occurrence of the searchString in the sourceString )
+;----------------------------------------------
+FindPosition 				PROTO,
+	:DWORD,:DWORD
+
 
 ;----------------------------------------------
 ; HandleLogin:handle login message from client through connfd
@@ -115,6 +126,15 @@ HandleRegister 			PROTO,
 ;	  ret:None
 ;----------------------------------------------
 HandleAddFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleDelFriend:handle del friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleDelFriend 		PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
@@ -183,6 +203,7 @@ SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
 CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
 CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
+UNFRIENDED				db 'You are unfriended by %s',0
 SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
 
 ;==================== DATA =====================
