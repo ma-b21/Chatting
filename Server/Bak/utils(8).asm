@@ -35,7 +35,9 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 	
 	LOCAL @addr:sockaddr_in
 	LOCAL @connfd:DWORD
+	LOCAL implementInfo: WSADATA
 	
+	invoke WSAStartup, 101h, ADDR implementInfo
 	invoke socket,AF_INET, SOCK_STREAM,IPPROTO_TCP
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK

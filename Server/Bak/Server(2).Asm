@@ -507,6 +507,7 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	LOCAL @fileHandle:DWORD
 	LOCAL @dataLen:DWORD
 	LOCAL @targetSocket:DWORD
+	LOCAL @new_msg:CLIENT_MSG
 	
 	mov @targetSocket,-1
 	mov  esi,msg

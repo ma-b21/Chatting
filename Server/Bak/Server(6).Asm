@@ -562,6 +562,23 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	
 	;forward message
 	
+	.IF @targetSocket != -1
+		invoke CreateFile, OFFSET BUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    	; Save the file handle
+    	mov @fileHandle, eax 
+
+    	; Read file contents
+    	invoke ReadFile, @fileHandle, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+    	; Close file handler
+    	invoke CloseHandle, @fileHandle
+    
+    	; Add '\0' to the end
+    	mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
+    	add eax, @dataLen
+    	mov BYTE PTR [eax], 0
+    
+    	invoke SendServerResponse,connfd,S_FORWARDMSG,OFFSET READFILEBUFFER
+	.ENDIF
 	
 	ASSUME esi:nothing
 	ret

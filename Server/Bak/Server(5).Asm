@@ -49,6 +49,12 @@ DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov SERVER_STATE, 0
 		invoke SetWindowText,btnhWnd,OFFSET BTN_DOWNTEXT
 		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		mov eax, wParam
 		.IF eax == IDC_BUTTON

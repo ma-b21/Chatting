@@ -28,11 +28,6 @@ CreateSocketForServer		PROC, port:DWORD
 		ret
 	.ENDIF
 	
-	invoke ioctlsocket,@listenfd,FIONBIO,OFFSET MODE
-	.IF eax != NO_ERROR
-		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
-		ret
-	.ENDIF
 	mov eax, @listenfd
 	ret
 	

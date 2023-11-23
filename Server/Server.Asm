@@ -12,7 +12,7 @@ start:
 	mov		hInstance,eax
 	
 	invoke CreateMutex, NULL, FALSE, NULL
-    mov hMutex, eax
+    mov 	hMutex, eax
     
     invoke InitCommonControls
 	invoke DialogBoxParam,hInstance,IDD_DIALOG1,NULL,addr DlgProc,NULL

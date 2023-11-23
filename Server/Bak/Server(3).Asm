@@ -584,6 +584,7 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
     	mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
     	add eax, @dataLen
     	mov BYTE PTR [eax], 0
+    	invoke MessageBox,NULL,OFFSET debug,NULL,MB_OK
     
     	invoke SendServerResponse,connfd,S_FORWARDMSG,OFFSET READFILEBUFFER
 	.ENDIF

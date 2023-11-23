@@ -5,6 +5,9 @@ CreateSocketForServer		PROC, port:DWORD
 	
 	LOCAL @addr:sockaddr_in
 	LOCAL @listenfd:DWORD
+	LOCAL implementInfo: WSADATA
+	
+	invoke WSAStartup, 101h, ADDR implementInfo
 	invoke socket,AF_INET, SOCK_STREAM, 0
 	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK

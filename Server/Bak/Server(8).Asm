@@ -500,6 +500,7 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	LOCAL @dataLen:DWORD
 	LOCAL @targetSocket:DWORD
 	
+	mov @targetSocket,-1
 	mov  esi,msg
 	ASSUME esi: PTR CLIENT_MSG
 	
@@ -514,7 +515,11 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 				
 		.IF eax == [edi].Sockfd
 			invoke lstrcpy,ADDR @source,ADDR [edi].UserName
-			.BREAK
+		.ENDIF
+		
+		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
+		.IF eax == 0
+			mov @targetSocket, [edi].Sockfd
 		.ENDIF
 				
 		pop ecx
@@ -553,6 +558,9 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	invoke WriteFile,@fileHandle,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
 		
 	invoke CloseHandle,@fileHandle
+	
+	;forward message
+	
 	
 	ASSUME esi:nothing
 	ret

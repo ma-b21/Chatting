@@ -519,7 +519,8 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
 		.IF eax == 0
-			mov @targetSocket, [edi].Sockfd
+			push [edi].Sockfd
+			pop @targetSocket 
 		.ENDIF
 				
 		pop ecx

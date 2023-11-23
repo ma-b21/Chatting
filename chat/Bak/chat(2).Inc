@@ -65,6 +65,13 @@ AddProc 					PROTO ,
 	:DWORD,:DWORD,:DWORD,:DWORD
 
 ;----------------------------------------------
+; DelFriend:Delete Friend 
+;     args:None
+;     ret:None
+;----------------------------------------------
+DelFriend 					PROTO
+
+;----------------------------------------------
 ; SendRequest:Send request to Server
 ;     args1:sign:DWORD,
 ;	  args2:target:PTR BYTE,
@@ -126,12 +133,14 @@ GetChatHistory 				PROTO
 UpdateChatHistory 			PROTO,
 	:PTR BYTE
 
+
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
 IDC_LUNAME          equ 1002
 IDC_LPASSWD         equ 1005
 IDC_LOGINBUTTON     equ 1006
-IDC_REGBUTTON       equ 1007 
+IDC_REGBUTTON       equ 1007
+IDC_IPADDRESS		equ 1019 
 
 IDD_MAIN            equ 1001
 IDC_MCHATBOX        equ 1008
@@ -139,12 +148,14 @@ IDC_MSENDBOX        equ 1009
 IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
+IDC_MDELFRIENDBTN	equ 1020
 
 IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
 ID_TIMER            equ 1017
+IDI_ICON            equ 1018
 
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
@@ -165,6 +176,35 @@ ENDM
 	mov connfd,-1
 ENDM
 
+@MAKEIPADDRESS MACRO a, b, c, d
+    mov eax, a
+    shl eax, 24
+    mov ecx, b
+    shl ecx, 16
+    or eax, ecx
+    mov ecx, c
+    shl ecx, 8
+    or eax, ecx
+    mov ecx, d
+    or eax, ecx
+ENDM
+
+@SetServerIP  MACRO
+	
+	invoke SendMessage,IPhWnd,IPM_GETADDRESS,0,ADDR ipAddress
+	
+	mov eax, ipAddress
+    movzx ebx, al
+    movzx ecx, ah
+    shr eax, 16
+    movzx edx, al
+    movzx esi, ah
+	
+	invoke wsprintf, ADDR DEFAULT_IP,ADDR ipFormat,ebx, ecx, edx, esi
+	invoke MessageBox,NULL,OFFSET DEFAULT_IP,NULL,MB_OK
+	
+ENDM
+
 .const
 ;------------------ SKIN ------------------------
 SkinDllName				db	"Skin.dll",0
@@ -180,9 +220,8 @@ MainClassName           db 'MAINWINCLASS',0
 dlgName					db 'Login',0
 mainName                db 'Client',0
 
-;------------------ SOCKET ---------------------- 
-DEFAULT_IP              db '127.0.0.1', 0
-
+;-------------------- IP ------------------------
+ipFormat				db '%d.%d.%d.%d',0
 
 ;------------------- TIPS -----------------------
 TP_ALREADYLOGIN			db 'The user is already login!',0
@@ -197,7 +236,8 @@ TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
 TP_ADDSUCCESS           db 'Add Friend Success',0
 TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
 TP_FRIENDEXISTS         db 'That friend is already exists',0
-TP_NULL                 db dup(0)
+TP_DELSUCCESS			db 'Delete Friend Success',0
+TP_NULL                 db 0,0
 .data
 
 hInstance				dd ?      		 	;handle of process
@@ -207,6 +247,7 @@ CommandLine				dd ?     		  	;command handle
 LoginhWnd				dd ?      		 	;login window handle
 UserhWnd                dd ?      		 	;username input
 PasshWnd                dd ?				;password input
+IPhWnd					dd ?				;IPADDRESS
 
 MainhWnd                dd ?				;main window handle
 chathWnd                dd ?  				;chat history box handle
@@ -219,6 +260,8 @@ AddhWnd					dd ?				;add window handle
 frNamehWnd              dd ?				;friend name input
 addSearchhWnd           dd ?				;add button handle
 
+ipAddress               dd ?
+
 connfd 					dd -1				;connect socket
 LOGINFLAG               dd 0				;if login open main window
 UserName                db 128 dup(0), 0
@@ -226,3 +269,6 @@ PassWord                db 128 dup(0), 0
 
 ;------------------ BUFFER ----------------------
 textBuffer              db 8192 dup(0), 0
+
+;------------------ SOCKET ---------------------- 
+DEFAULT_IP              db 20 dup(0)

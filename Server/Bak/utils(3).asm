@@ -33,7 +33,7 @@ CreateSocketForServer		PROC, port:DWORD
 	
 CreateSocketForServer	ENDP
 
-ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
+ConnectSocketForClient   	PROC, port:DWORD, ip:BYTE
 	
 	LOCAL @addr:sockaddr_in
 	LOCAL @connfd:DWORD

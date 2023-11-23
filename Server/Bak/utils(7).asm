@@ -28,6 +28,7 @@ CreateSocketForServer		PROC, port:DWORD
 		ret
 	.ENDIF
 	mov eax, @listenfd
+	ret
 	
 CreateSocketForServer	ENDP
 

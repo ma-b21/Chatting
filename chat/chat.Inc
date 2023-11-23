@@ -133,12 +133,14 @@ GetChatHistory 				PROTO
 UpdateChatHistory 			PROTO,
 	:PTR BYTE
 
+
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
 IDC_LUNAME          equ 1002
 IDC_LPASSWD         equ 1005
 IDC_LOGINBUTTON     equ 1006
-IDC_REGBUTTON       equ 1007 
+IDC_REGBUTTON       equ 1007
+IDC_IPADDRESS		equ 1019 
 
 IDD_MAIN            equ 1001
 IDC_MCHATBOX        equ 1008
@@ -174,6 +176,34 @@ ENDM
 	mov connfd,-1
 ENDM
 
+@MAKEIPADDRESS MACRO a, b, c, d
+    mov eax, a
+    shl eax, 24
+    mov ecx, b
+    shl ecx, 16
+    or eax, ecx
+    mov ecx, c
+    shl ecx, 8
+    or eax, ecx
+    mov ecx, d
+    or eax, ecx
+ENDM
+
+@SetServerIP  MACRO
+	
+	invoke SendMessage,IPhWnd,IPM_GETADDRESS,0,ADDR ipAddress
+	
+	mov eax, ipAddress
+    movzx ebx, al
+    movzx ecx, ah
+    shr eax, 16
+    movzx edx, al
+    movzx esi, ah
+	
+	invoke wsprintf, ADDR DEFAULT_IP,ADDR ipFormat,esi, edx, ecx, ebx
+	
+ENDM
+
 .const
 ;------------------ SKIN ------------------------
 SkinDllName				db	"Skin.dll",0
@@ -189,9 +219,8 @@ MainClassName           db 'MAINWINCLASS',0
 dlgName					db 'Login',0
 mainName                db 'Client',0
 
-;------------------ SOCKET ---------------------- 
-DEFAULT_IP              db '127.0.0.1', 0
-
+;-------------------- IP ------------------------
+ipFormat				db '%d.%d.%d.%d',0
 
 ;------------------- TIPS -----------------------
 TP_ALREADYLOGIN			db 'The user is already login!',0
@@ -217,6 +246,7 @@ CommandLine				dd ?     		  	;command handle
 LoginhWnd				dd ?      		 	;login window handle
 UserhWnd                dd ?      		 	;username input
 PasshWnd                dd ?				;password input
+IPhWnd					dd ?				;IPADDRESS
 
 MainhWnd                dd ?				;main window handle
 chathWnd                dd ?  				;chat history box handle
@@ -229,6 +259,8 @@ AddhWnd					dd ?				;add window handle
 frNamehWnd              dd ?				;friend name input
 addSearchhWnd           dd ?				;add button handle
 
+ipAddress               dd ?
+
 connfd 					dd -1				;connect socket
 LOGINFLAG               dd 0				;if login open main window
 UserName                db 128 dup(0), 0
@@ -236,3 +268,6 @@ PassWord                db 128 dup(0), 0
 
 ;------------------ BUFFER ----------------------
 textBuffer              db 8192 dup(0), 0
+
+;------------------ SOCKET ---------------------- 
+DEFAULT_IP              db 20 dup(0)

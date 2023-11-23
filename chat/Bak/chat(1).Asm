@@ -117,6 +117,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		.IF eax == IDC_MADDFRIENDBTN
 			invoke InitCommonControls
 			invoke DialogBoxParam,hInstance,IDD_ADD,NULL,OFFSET AddProc,NULL
+		.ELSEIF eax == IDC_MDELFRIENDBTN
+			invoke DelFriend
 		.ELSEIF eax == IDC_MSENDBTN
 			invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
 			.IF eax == LB_ERR
@@ -201,6 +203,11 @@ Login PROC ,hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 Login ENDP
 
 LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
+
+	LOCAL @hicon:HICON
+	LOCAL @temp:DWORD
+	LOCAL @ipAddress:DWORD
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		push	hWin
@@ -216,6 +223,13 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov UserhWnd, eax
 		invoke GetDlgItem,LoginhWnd,IDC_LPASSWD
 		mov PasshWnd, eax
+		invoke GetDlgItem,LoginhWnd,IDC_IPADDRESS
+		mov IPhWnd, eax
+		
+		;set default ip
+		@MAKEIPADDRESS 127,0,0,1
+		mov @temp,eax
+		invoke SendMessage,IPhWnd,IPM_SETADDRESS,0,@temp
 		
 		;load icon
 		invoke LoadIcon,hInstance,IDI_ICON
@@ -227,9 +241,11 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		
 		mov eax, wParam
 		.IF eax == IDC_LOGINBUTTON
+			@SetServerIP
 			@ConnectServerIfNoConnection
 			mov eax,0
 			.IF connfd != -1
+			    
 				invoke SendLoginRequest
 			.ENDIF
 			.IF eax == 1
@@ -239,6 +255,7 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			.ENDIF
 			
 		.ELSEIF eax == IDC_REGBUTTON
+			@SetServerIP
 			@ConnectServerIfNoConnection
 			.IF connfd != -1
 				invoke SendRegisterRequest
@@ -305,6 +322,22 @@ AddProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 	ret
 
 AddProc ENDP
+
+DelFriend PROC
+
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	.IF eax == LB_ERR
+		ret
+	.ENDIF
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	invoke SendRequest,C_DELFRIEND,OFFSET UserName,ADDR @targetName
+	
+	ret
+DelFriend ENDP
 
 SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 
@@ -452,6 +485,12 @@ HandleRecvServerMsg  PROC
 			invoke UpdateFriendList
 		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG
 			invoke UpdateChatHistory,ADDR @server_msg.S_Text
+		.ELSEIF @server_msg.S_Sign == S_DELOK
+			invoke MessageBox,MainhWnd,OFFSET TP_DELSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_UNFRIENDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
 		.ENDIF
 	.ENDIF
 	ret
@@ -541,5 +580,6 @@ UpdateChatHistory PROC, msg:PTR BYTE
     ret
 
 UpdateChatHistory ENDP
+
 
 end Main

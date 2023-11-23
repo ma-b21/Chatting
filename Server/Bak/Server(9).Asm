@@ -498,6 +498,7 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	LOCAL @source[128]:BYTE
 	LOCAL @fileHandle:DWORD
 	LOCAL @dataLen:DWORD
+	LOCAL @targetSocket:DWORD
 	
 	mov  esi,msg
 	ASSUME esi: PTR CLIENT_MSG

@@ -23,6 +23,8 @@ start:
 
 DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		;init the handles

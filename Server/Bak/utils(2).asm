@@ -33,7 +33,7 @@ CreateSocketForServer		PROC, port:DWORD
 	
 CreateSocketForServer	ENDP
 
-ConnectSocketForClient   	PROC, port:DWORD, ip:BYTE
+ConnectSocketForClient   	PROC, port:DWORD, ip:PTR BYTE
 	
 	LOCAL @addr:sockaddr_in
 	LOCAL @connfd:DWORD
@@ -47,6 +47,7 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:BYTE
 	.ENDIF
 	mov @connfd, eax
 	
+	
 	invoke crt_memset,ADDR @addr, 0, SIZEOF @addr
 	mov @addr.sin_family,AF_INET
 	invoke htons,port
@@ -55,7 +56,7 @@ ConnectSocketForClient   	PROC, port:DWORD, ip:BYTE
 	mov @addr.sin_addr,eax
 	
 	invoke connect,@connfd,ADDR @addr,SIZEOF @addr
-	.IF eax < 0
+	.IF eax == -1
 		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
 		ret
 	.ENDIF

@@ -205,6 +205,8 @@ Login ENDP
 LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 
 	LOCAL @hicon:HICON
+	LOCAL @temp:DWORD
+	LOCAL @ipAddress:DWORD
 	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
@@ -221,6 +223,13 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov UserhWnd, eax
 		invoke GetDlgItem,LoginhWnd,IDC_LPASSWD
 		mov PasshWnd, eax
+		invoke GetDlgItem,LoginhWnd,IDC_IPADDRESS
+		mov IPhWnd, eax
+		
+		;set default ip
+		@MAKEIPADDRESS 127,0,0,1
+		mov @temp,eax
+		invoke SendMessage,IPhWnd,IPM_SETADDRESS,0,@temp
 		
 		;load icon
 		invoke LoadIcon,hInstance,IDI_ICON
@@ -228,13 +237,19 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
 		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
 		
+		;set richedit
+		invoke SendMessage,chathWnd,EM_SETEVENTMASK,0,ENM_LINK
+		invoke SendMessage,chathWnd,EM_AUTOURLDETECT,TRUE,NULL
+		
 	.ELSEIF eax == WM_COMMAND
 		
 		mov eax, wParam
 		.IF eax == IDC_LOGINBUTTON
+			@SetServerIP
 			@ConnectServerIfNoConnection
 			mov eax,0
 			.IF connfd != -1
+			    
 				invoke SendLoginRequest
 			.ENDIF
 			.IF eax == 1
@@ -244,6 +259,7 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			.ENDIF
 			
 		.ELSEIF eax == IDC_REGBUTTON
+			@SetServerIP
 			@ConnectServerIfNoConnection
 			.IF connfd != -1
 				invoke SendRegisterRequest
@@ -568,5 +584,6 @@ UpdateChatHistory PROC, msg:PTR BYTE
     ret
 
 UpdateChatHistory ENDP
+
 
 end Main
