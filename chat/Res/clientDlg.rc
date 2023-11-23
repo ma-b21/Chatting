@@ -4,11 +4,10 @@
 #define IDC_RED1 1008
 #define IDC_BTN1 1010
 #define IDC_BTN3 1021
-#define IDC_BTN3 1021
 #define IDC_GRP2 1003
 #define Friends 1012
 #define newFriend 1020
-IDD_DLG1 DIALOGEX 3,3,279,199
+IDD_DLG1 DIALOGEX 3,3,281,200
 CAPTION "Client"
 FONT 14,"»ªÎÄÖÐËÎ",400,0,134
 CLASS "MAINWINCLASS"
