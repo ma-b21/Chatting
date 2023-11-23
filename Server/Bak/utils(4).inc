@@ -28,6 +28,7 @@ ConnectSocketForClient       PROTO,
 ;=================== STRUCTURE ===================
 CLIENT_MSG    	STRUCT
 	C_Sign		dd ?
+	C_Source    db 128  dup(0);补充字段，仅在聊天功能使用
 	C_Target   	db 128  dup(0)
 	C_Text    	db 8192 dup(0)
 CLIENT_MSG 		ENDS
@@ -64,6 +65,7 @@ S_ADDERRNOUSER          equ 812h
 S_ADDOK					equ 813h
 S_ADDFRIENDEXISTS       equ 814h
 S_UAREADDED             equ 815h
+S_FORWARDMSG            equ 817h
 
 ;===================== CONST =======================
 .const

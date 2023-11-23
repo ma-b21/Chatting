@@ -2,11 +2,14 @@ IFNDEF SERVER_HEADER
 SERVER_HEADER PROTO
 
 include utils.inc
+include msvcrt.inc
 
-includelib kernel32.lib
+includelib msvcrt.lib
 includelib user32.lib
-includelib Comctl32.lib
+includelib kernel32.lib
 includelib shell32.lib
+includelib comctl32.lib
+includelib comdlg32.lib
 
 ;=================== FUNCTION ====================
 ;----------------------------------------------
@@ -71,6 +74,17 @@ FindPassword 			PROTO,
 ;----------------------------------------------
 FindString 				PROTO,
 	:DWORD,:DWORD
+	
+;----------------------------------------------
+; FindPosition:
+;	  args1:sourceString:DWORD, 
+;	  args2:searchString:DWORD
+;	  ret:(0, searchString not in source String)
+;		  (The Position of the first occurrence of the searchString in the sourceString )
+;----------------------------------------------
+FindPosition 				PROTO,
+	:DWORD,:DWORD
+
 
 ;----------------------------------------------
 ; HandleLogin:handle login message from client through connfd
@@ -118,12 +132,33 @@ HandleAddFriend 		PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleDelFriend:handle del friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleDelFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; HandleSendMsg:handle message from client to another client through connfd
 ;	  args1:connfd:DWORD,
 ;	  args2:msg:PTR CLIENT_MSG
 ;	  ret:None
 ;----------------------------------------------
 HandleSendMsg 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleSendFile:handle file from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendFile 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+HandlePartFile 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
@@ -161,6 +196,7 @@ SkinName				db	"asus.she",0
 IDD_DIALOG1				equ 1100
 IDC_LIST            	equ 1101
 IDC_BUTTON          	equ 1102
+IDI_ICON				equ 1103
 
 ;------------------ BUTTON -----------------------
 BTN_UPTEXT              db "STOP SERVER", 0
@@ -172,6 +208,8 @@ DEFAULT_PORT            equ 22910
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
+fileWrite				db 'ab',0
+TEMP					db 'temp',0
 FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0
@@ -182,7 +220,9 @@ SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
 CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
 CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
+UNFRIENDED				db 'You are unfriended by %s',0
 SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
+FILEINCHAT              db '<file://%s>',0
 
 ;==================== DATA =====================
 .data
@@ -204,5 +244,6 @@ btnhWnd                	dd ?
 hMutex             		dd ?
 
 serverListenfd          dd ?
+fileTrans				dd 0
 
 ENDIF

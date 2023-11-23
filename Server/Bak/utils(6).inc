@@ -50,6 +50,7 @@ C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
 C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -62,7 +63,7 @@ S_SERVERSTOP            equ 809h
 S_ADDERRNOUSER          equ 812h
 S_ADDOK					equ 813h
 S_ADDFRIENDEXISTS       equ 814h
-
+S_UAREADDED             equ 815h
 
 ;===================== CONST =======================
 .const

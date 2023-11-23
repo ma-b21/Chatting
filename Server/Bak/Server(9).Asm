@@ -12,7 +12,7 @@ start:
 	mov		hInstance,eax
 	
 	invoke CreateMutex, NULL, FALSE, NULL
-    mov hMutex, eax
+    mov 	hMutex, eax
     
     invoke InitCommonControls
 	invoke DialogBoxParam,hInstance,IDD_DIALOG1,NULL,addr DlgProc,NULL
@@ -23,6 +23,8 @@ start:
 
 DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		;init the handles
@@ -48,6 +50,12 @@ DlgProc PROC hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		
 		mov SERVER_STATE, 0
 		invoke SetWindowText,btnhWnd,OFFSET BTN_DOWNTEXT
+		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
 		
 	.ELSEIF eax == WM_COMMAND
 		mov eax, wParam
@@ -174,6 +182,10 @@ CommunicateWithClient   PROC, connfd:DWORD
             .CONTINUE
         .ENDIF
         
+        .IF fileTrans == 1
+        	.CONTINUE
+        .ENDIF
+        
         invoke HandleRecvClientMsg,connfd
 	.ENDW
 	
@@ -232,6 +244,12 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		invoke HandleSendMsg,connfd,esi
     	.ELSEIF [esi].C_Sign == C_GETHISTORY
     		invoke HandleHistory,connfd,esi
+    	.ELSEIF [esi].C_Sign == C_DELFRIEND
+    		invoke HandleDelFriend,connfd,esi
+		.ELSEIF [esi].C_Sign == C_SENDFILE
+			invoke HandleSendFile,connfd,esi
+		.ELSEIF [esi].C_Sign == C_PARTFILE
+			invoke HandlePartFile,connfd,esi
 		.ENDIF
 	.ENDIF
 
@@ -493,13 +511,113 @@ HandleAddFriend PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 
 HandleAddFriend ENDP
 
+HandleDelFriend PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+	
+	LOCAL @hFind:HANDLE
+	LOCAL @dataLen:DWORD
+	LOCAL @nameLen:DWORD
+	LOCAL @namePos:DWORD
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+	
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Target,ADDR [esi].C_Text
+	invoke DeleteFile,OFFSET HD_STRINGBUFFER
+	invoke CloseHandle,eax
+	
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Text,ADDR [esi].C_Target
+	invoke DeleteFile,OFFSET HD_STRINGBUFFER
+	invoke CloseHandle,eax
+	
+	invoke wsprintf,OFFSET BUFFER,OFFSET FRIENDPATH,ADDR [esi].C_Target
+	invoke CreateFile,OFFSET BUFFER,GENERIC_READ or GENERIC_WRITE,FILE_SHARE_READ,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @hFind,eax
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET NEWFRIEND,ADDR [esi].C_Text
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @nameLen,eax
+	; Read file contents
+	invoke ReadFile, @hFind, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+	
+	mov eax, OFFSET READFILEBUFFER  
+	add eax, @dataLen
+	mov BYTE PTR [eax], 0
+	
+	invoke FindPosition,OFFSET READFILEBUFFER, OFFSET HD_STRINGBUFFER
+	mov @namePos,eax
+	invoke FindString,OFFSET READFILEBUFFER, OFFSET HD_STRINGBUFFER
+	invoke lstrcpy, OFFSET HD_STRINGBUFFER, ADDR [eax]
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @dataLen,eax
+	
+	invoke SetFilePointer,@hFind,@namePos,NULL,FILE_BEGIN
+	invoke WriteFile,@hFind,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
+	invoke SetEndOfFile,@hFind
+	invoke CloseHandle,@hFind
+	
+	invoke wsprintf,OFFSET BUFFER,OFFSET FRIENDPATH,ADDR [esi].C_Text
+	invoke CreateFile,OFFSET BUFFER,GENERIC_READ or GENERIC_WRITE,FILE_SHARE_READ,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @hFind,eax
+	;HD_stringbuffer = newfriend name
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET NEWFRIEND,ADDR [esi].C_Target
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @nameLen,eax
+	; Read file contents
+	invoke ReadFile, @hFind, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+	
+	mov eax, OFFSET READFILEBUFFER  
+	add eax, @dataLen
+	mov BYTE PTR [eax], 0
+	
+	invoke FindPosition,OFFSET READFILEBUFFER, OFFSET HD_STRINGBUFFER
+	mov @namePos,eax
+	invoke FindString,OFFSET READFILEBUFFER, OFFSET HD_STRINGBUFFER
+	invoke lstrcpy, OFFSET HD_STRINGBUFFER, ADDR [eax]
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @dataLen,eax
+	
+	invoke SetFilePointer,@hFind,@namePos,NULL,FILE_BEGIN
+	invoke WriteFile,@hFind,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
+	invoke SetEndOfFile,@hFind
+	invoke CloseHandle,@hFind
+	
+	
+	@LOCK_SHARE_VAR
+    	
+	mov edi,OFFSET CLIENTLIST
+	ASSUME edi:PTR CLIENT
+	mov ecx,0
+	.WHILE ecx < MAX_CONNECT
+		push ecx
+		
+		invoke lstrcmp,ADDR[esi].C_Text,ADDR [edi].UserName
+		.IF eax == 0
+			invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET UNFRIENDED,ADDR [esi].C_Target
+			invoke SendServerResponse,[edi].Sockfd,S_UNFRIENDED,OFFSET HD_STRINGBUFFER
+			.BREAK
+		.ENDIF
+		
+		pop ecx
+		add edi,TYPE CLIENT
+		inc ecx
+	.ENDW
+	
+	@UNLOCK_SHARE_VAR
+	invoke SendServerResponse,connfd,S_DELOK,NULL
+	
+	ASSUME esi:nothing
+	ret
+
+HandleDelFriend ENDP
+
 HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	
 	LOCAL @source[128]:BYTE
 	LOCAL @fileHandle:DWORD
 	LOCAL @dataLen:DWORD
 	LOCAL @targetSocket:DWORD
+	LOCAL @new_msg:CLIENT_MSG
 	
+	mov @targetSocket,-1
 	mov  esi,msg
 	ASSUME esi: PTR CLIENT_MSG
 	
@@ -514,7 +632,12 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 				
 		.IF eax == [edi].Sockfd
 			invoke lstrcpy,ADDR @source,ADDR [edi].UserName
-			.BREAK
+		.ENDIF
+		
+		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
+		.IF eax == 0
+			push [edi].Sockfd
+			pop @targetSocket 
 		.ENDIF
 				
 		pop ecx
@@ -554,10 +677,148 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		
 	invoke CloseHandle,@fileHandle
 	
+	;forward message
+	.IF @targetSocket != -1
+		mov @new_msg.C_Sign,C_GETHISTORY
+		invoke lstrcpy,ADDR @new_msg.C_Target,ADDR @source
+		invoke lstrcpy,ADDR @new_msg.C_Text,ADDR [esi].C_Target
+		
+		invoke HandleHistory,@targetSocket,ADDR @new_msg
+	.ENDIF
+	
 	ASSUME esi:nothing
 	ret
 
 HandleSendMsg ENDP
+
+HandleSendFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+	
+	LOCAL @fileHandle:DWORD
+	LOCAL @source[128]:BYTE
+	LOCAL @dataLen:DWORD
+	LOCAL @targetSocket:DWORD
+	LOCAL @new_msg:CLIENT_MSG
+	LOCAL @bytesRecv:DWORD
+	LOCAL @bytesWrit:DWORD
+	
+	mov fileTrans,1
+	mov @targetSocket,-1
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+	
+	@LOCK_SHARE_VAR
+        	
+    mov edi,OFFSET CLIENTLIST
+	ASSUME edi:PTR CLIENT
+	mov ecx,0
+	.WHILE ecx < MAX_CONNECT
+		push ecx
+		mov eax,connfd
+				
+		.IF eax == [edi].Sockfd
+			invoke lstrcpy,ADDR @source,ADDR [edi].UserName
+		.ENDIF
+		
+		invoke lstrcmp,ADDR [esi].C_Target,ADDR [edi].UserName
+		.IF eax == 0
+			push [edi].Sockfd
+			pop @targetSocket 
+		.ENDIF
+				
+		pop ecx
+		add edi,TYPE CLIENT
+		inc ecx
+	.ENDW
+			
+	@UNLOCK_SHARE_VAR
+	
+	;source chat History
+	invoke wsprintf,OFFSET BUFFER,OFFSET CHATHISTORY,ADDR @source,ADDR [esi].C_Target
+	
+	invoke CreateFile,OFFSET BUFFER,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @fileHandle,eax
+	invoke SetFilePointer,@fileHandle,0,NULL,FILE_END
+	
+	invoke wsprintf,OFFSET BUFFER,OFFSET FILEINCHAT,ADDR [esi].C_Text
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCE,ADDR @source,OFFSET BUFFER
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @dataLen,eax
+		
+	invoke WriteFile,@fileHandle,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
+		
+	invoke CloseHandle,@fileHandle
+	
+	;target chat history
+	invoke wsprintf,OFFSET BUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Target,ADDR @source
+	
+	invoke CreateFile,OFFSET BUFFER,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @fileHandle,eax
+	invoke SetFilePointer,@fileHandle,0,NULL,FILE_END
+
+	invoke wsprintf,OFFSET BUFFER,OFFSET FILEINCHAT,ADDR [esi].C_Text
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCE,ADDR @source,OFFSET BUFFER
+	invoke lstrlen,OFFSET HD_STRINGBUFFER
+	mov @dataLen,eax
+		
+	invoke WriteFile,@fileHandle,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
+		
+	invoke CloseHandle,@fileHandle
+	
+	invoke SendServerResponse,connfd,S_FILECONFIRM,NULL
+	
+	;recv File
+	invoke CreateFile,OFFSET TEMP,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @fileHandle,eax
+	
+	mov @bytesRecv,1
+	.WHILE @bytesRecv != 0
+		
+		invoke recv,connfd,OFFSET READSOCKETBUFFER,8192,0
+		mov @bytesRecv,eax
+		
+		invoke lstrcmp, OFFSET READSOCKETBUFFER,OFFSET fileWrite
+		.IF eax == 0
+			.BREAK
+		.endif
+		
+		invoke WriteFile,@fileHandle,OFFSET READSOCKETBUFFER,@bytesRecv,ADDR @bytesWrit,NULL
+		
+	.ENDW
+	
+	
+	
+		
+	invoke CloseHandle,@fileHandle
+	
+	invoke MessageBox,NULL,NULL,NULL,MB_OK
+	;forward message
+	.IF @targetSocket != -1
+		mov @new_msg.C_Sign,C_GETHISTORY
+		invoke lstrcpy,ADDR @new_msg.C_Target,ADDR @source
+		invoke lstrcpy,ADDR @new_msg.C_Text,ADDR [esi].C_Target
+		
+		invoke HandleHistory,@targetSocket,ADDR @new_msg
+	.ENDIF
+	
+	mov fileTrans,0
+	ASSUME esi:nothing
+	ret
+
+HandleSendFile ENDP
+
+HandlePartFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+	
+	LOCAL @dataLen:DWORD
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+	
+
+	
+	ASSUME esi:nothing
+	ret
+
+HandlePartFile ENDP
 
 HandleHistory PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 
@@ -636,6 +897,40 @@ FindString PROC uses esi edi ecx,sourceString:DWORD, searchString:DWORD
         jmp @@Loop
         
 FindString ENDP
+
+FindPosition PROC uses esi edi ecx edx,sourceString:DWORD, searchString:DWORD
+    
+    mov esi, sourceString  
+    mov edi, searchString
+    mov ecx, 0
+    mov edx, 0  
+    @@Loop:
+        mov al, [esi]
+        mov bl, [edi]
+        .IF bl == 0
+            .IF ecx == 0
+                mov eax, 0
+            .ELSE
+                mov eax, edx
+         		ret
+            .ENDIF
+            ret
+        .ELSEIF al == 0
+        	mov eax, 0
+        	ret
+        .ELSEIF al != bl
+        	add edx, 1
+            mov ecx, 0
+            mov edi, searchString
+            inc esi
+        .ELSE
+            inc esi 
+            inc edi
+            inc ecx
+        .ENDIF
+        jmp @@Loop
+        
+FindPosition ENDP
 
 FindPassword PROC, uname:PTR BYTE, password:PTR BYTE
     

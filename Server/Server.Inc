@@ -2,11 +2,14 @@ IFNDEF SERVER_HEADER
 SERVER_HEADER PROTO
 
 include utils.inc
+include msvcrt.inc
 
-includelib kernel32.lib
+includelib msvcrt.lib
 includelib user32.lib
-includelib Comctl32.lib
+includelib kernel32.lib
 includelib shell32.lib
+includelib comctl32.lib
+includelib comdlg32.lib
 
 ;=================== FUNCTION ====================
 ;----------------------------------------------
@@ -147,6 +150,18 @@ HandleSendMsg 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleSendFile:handle file from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendFile 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+HandlePartFile 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; HandleHistory:handle message from client to get chat history through connfd
 ;	  args1:connfd:DWORD,
 ;	  args2:msg:PTR CLIENT_MSG
@@ -193,6 +208,8 @@ DEFAULT_PORT            equ 22910
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
+fileWrite				db 'ab',0
+TEMP					db 'pic1.png',0
 FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0
@@ -205,6 +222,7 @@ CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0
 ADDEDASFRIEND           db 'You are added as friend of %s',0
 UNFRIENDED				db 'You are unfriended by %s',0
 SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
+FILEINCHAT              db '<file://%s>',0
 
 ;==================== DATA =====================
 .data
@@ -226,5 +244,6 @@ btnhWnd                	dd ?
 hMutex             		dd ?
 
 serverListenfd          dd ?
+fileTrans				dd 0
 
 ENDIF
