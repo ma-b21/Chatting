@@ -70,6 +70,7 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 	
 	LOCAL @selectItem:DWORD
 	LOCAL @targetName[128]:BYTE
+	LOCAL @hicon:HICON
 	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
@@ -102,6 +103,13 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		
 		;set timer to get history
 		;invoke SetTimer,MainhWnd,ID_TIMER,100,OFFSET GetChatHistory
+	
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		mov eax,wParam
 		and eax,lower
@@ -109,6 +117,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		.IF eax == IDC_MADDFRIENDBTN
 			invoke InitCommonControls
 			invoke DialogBoxParam,hInstance,IDD_ADD,NULL,OFFSET AddProc,NULL
+		.ELSEIF eax == IDC_MDELFRIENDBTN
+			invoke DelFriend
 		.ELSEIF eax == IDC_MSENDBTN
 			invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
 			.IF eax == LB_ERR
@@ -193,6 +203,9 @@ Login PROC ,hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD
 Login ENDP
 
 LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
+
+	LOCAL @hicon:HICON
+	
 	mov		eax,uMsg
 	.IF eax == WM_INITDIALOG
 		push	hWin
@@ -208,6 +221,13 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		mov UserhWnd, eax
 		invoke GetDlgItem,LoginhWnd,IDC_LPASSWD
 		mov PasshWnd, eax
+		
+		;load icon
+		invoke LoadIcon,hInstance,IDI_ICON
+		mov @hicon,eax
+		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
+		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
 	.ELSEIF eax == WM_COMMAND
 		
 		mov eax, wParam
@@ -290,6 +310,22 @@ AddProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 	ret
 
 AddProc ENDP
+
+DelFriend PROC
+
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	.IF eax == LB_ERR
+		ret
+	.ENDIF
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	invoke SendRequest,C_DELFRIEND,OFFSET UserName,ADDR @targetName
+	
+	ret
+DelFriend ENDP
 
 SendRequest PROC,sign:DWORD,target:PTR BYTE,text:PTR BYTE
 
@@ -435,8 +471,14 @@ HandleRecvServerMsg  PROC
 		.ELSEIF @server_msg.S_Sign == S_UAREADDED
 			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke UpdateFriendList
-		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG
+		.ELSEIF @server_msg.S_Sign == S_FORWARDMSG1
 			invoke UpdateChatHistory,ADDR @server_msg.S_Text
+		.ELSEIF @server_msg.S_Sign == S_DELOK
+			invoke MessageBox,MainhWnd,OFFSET TP_DELSUCCESS,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_UNFRIENDED
+			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
+			invoke UpdateFriendList
 		.ENDIF
 	.ENDIF
 	ret
@@ -511,6 +553,23 @@ GetChatHistory PROC
 	ret
 
 GetChatHistory ENDP
+
+GetChatHistoryRec PROC
+	
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	.IF eax == LB_ERR
+		ret
+	.ENDIF
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
+	
+	ret
+
+GetChatHistoryRec ENDP
 
 UpdateChatHistory PROC, msg:PTR BYTE
 	

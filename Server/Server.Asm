@@ -240,8 +240,11 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		invoke HandleSendMsg,connfd,esi
     	.ELSEIF [esi].C_Sign == C_GETHISTORY
     		invoke HandleHistory,connfd,esi
+    	.ELSEIF [esi].C_Sign == C_GETHISTORYREC
+    		invoke HandleHistoryRec,connfd,esi
     	.ELSEIF [esi].C_Sign == C_DELFRIEND
     		invoke HandleDelFriend,connfd,esi
+    	
 		.ENDIF
 	.ENDIF
 
@@ -645,7 +648,7 @@ HandleSendMsg PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	mov @fileHandle,eax
 	invoke SetFilePointer,@fileHandle,0,NULL,FILE_END
 	
-	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCE,ADDR @source,ADDR [esi].C_Text
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCEME,ADDR @source,ADDR [esi].C_Text
 	invoke lstrlen,OFFSET HD_STRINGBUFFER
 	mov @dataLen,eax
 		
@@ -691,6 +694,37 @@ HandleHistory PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	mov  esi,msg
 	ASSUME esi: PTR CLIENT_MSG
 	;Get history filename
+	invoke wsprintf,OFFSET BUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Text,ADDR [esi].C_Target
+	
+	invoke CreateFile, OFFSET BUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
+    ; Save the file handle
+    mov @fileHandle, eax 
+
+    ; Read file contents
+    invoke ReadFile, @fileHandle, OFFSET READFILEBUFFER, 8192, ADDR @dataLen, NULL
+    ; Close file handler
+    invoke CloseHandle, @fileHandle
+    
+    ; Add '\0' to the end
+    mov eax, OFFSET READFILEBUFFER  ; 将 @fileContent 的地址放入 eax
+    add eax, @dataLen
+    mov BYTE PTR [eax], 0
+    
+    invoke SendServerResponse,connfd,S_FORWARDMSG1,OFFSET READFILEBUFFER
+	
+	ASSUME esi:nothing
+	ret
+
+HandleHistory ENDP
+
+HandleHistoryRec PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+
+	LOCAL @fileHandle:DWORD
+	LOCAL @dataLen:DWORD
+	
+	mov  esi,msg
+	ASSUME esi: PTR CLIENT_MSG
+	;Get history filename
 	invoke wsprintf,OFFSET BUFFER,OFFSET CHATHISTORY,ADDR [esi].C_Target,ADDR [esi].C_Text
 	
 	invoke CreateFile, OFFSET BUFFER, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
@@ -707,12 +741,13 @@ HandleHistory PROC,connfd:DWORD,msg:PTR CLIENT_MSG
     add eax, @dataLen
     mov BYTE PTR [eax], 0
     
-    invoke SendServerResponse,connfd,S_FORWARDMSG,OFFSET READFILEBUFFER
+    invoke SendServerResponse,connfd,S_FORWARDMSG2,OFFSET READFILEBUFFER
 	
 	ASSUME esi:nothing
 	ret
 
-HandleHistory ENDP
+HandleHistoryRec ENDP
+
 
 SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 

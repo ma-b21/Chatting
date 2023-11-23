@@ -144,6 +144,8 @@ IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
+ID_TIMER            equ 1017
+
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
 
@@ -195,7 +197,7 @@ TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
 TP_ADDSUCCESS           db 'Add Friend Success',0
 TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
 TP_FRIENDEXISTS         db 'That friend is already exists',0
-
+TP_NULL                 db dup(0)
 .data
 
 hInstance				dd ?      		 	;handle of process

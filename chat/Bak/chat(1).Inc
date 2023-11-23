@@ -65,6 +65,13 @@ AddProc 					PROTO ,
 	:DWORD,:DWORD,:DWORD,:DWORD
 
 ;----------------------------------------------
+; DelFriend:Delete Friend 
+;     args:None
+;     ret:None
+;----------------------------------------------
+DelFriend 					PROTO
+
+;----------------------------------------------
 ; SendRequest:Send request to Server
 ;     args1:sign:DWORD,
 ;	  args2:target:PTR BYTE,
@@ -119,6 +126,13 @@ UpdateFriendList			PROTO
 GetChatHistory 				PROTO
 
 ;----------------------------------------------
+; GetChatHistoryRec:Get chat history from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
+GetChatHistory 				PROTO
+
+;----------------------------------------------
 ; UpdateChatHistory:Update chat history in chatbox 
 ;     args:msg:PTR BYTE
 ;     ret:None
@@ -139,12 +153,14 @@ IDC_MSENDBOX        equ 1009
 IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
+IDC_MDELFRIENDBTN	equ 1020
 
 IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
 IDC_ADDBTN          equ 1016
 
 ID_TIMER            equ 1017
+IDI_ICON            equ 1018
 
 lower               equ 65535     ; 0xFFFF
 higher              equ 4294901760; 0xFFFF0000
@@ -197,6 +213,7 @@ TP_ADDUSERNOTEXISTS     db 'The user you search does not exists!',0
 TP_ADDSUCCESS           db 'Add Friend Success',0
 TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
 TP_FRIENDEXISTS         db 'That friend is already exists',0
+TP_DELSUCCESS			db 'Delete Friend Success',0
 TP_NULL                 db 0,0
 .data
 

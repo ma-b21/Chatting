@@ -118,6 +118,24 @@ HandleAddFriend 		PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleSendMsg:handle message from client to another client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleSendMsg 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
+; HandleHistory:handle message from client to get chat history through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleHistory 			PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; UpdateClientList:update the CLIENTLIST
 ;	  args:None
 ;	  ret:None
@@ -154,17 +172,17 @@ DEFAULT_PORT            equ 22910
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
-FILE                	db 'USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
+FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0
 REGFORM                 db "User:%s|%s",0dh,0ah,0
-FRIENDPATH              db '.\\FRIENDS\\%s',0
+FRIENDPATH              db '.\\config\\FRIENDS\\%s',0
 NEWFRIEND               db '%s,',0
-SEARCHFRIEND            db '.\\FRIENDS\\*.*',0
-CHATHISTORYDIR          db '.\\CHATHISTORY\\%s',0
-CHATHISTORY             db '.\\CHATHISTORY\\%s\\%s',0 
+SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
+CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
+CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
-SENTENCE                db '%s',0dh,0ah,'%s',0 
+SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
 
 ;==================== DATA =====================
 .data

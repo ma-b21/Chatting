@@ -71,6 +71,17 @@ FindPassword 			PROTO,
 ;----------------------------------------------
 FindString 				PROTO,
 	:DWORD,:DWORD
+	
+;----------------------------------------------
+; FindPosition:
+;	  args1:sourceString:DWORD, 
+;	  args2:searchString:DWORD
+;	  ret:(0, searchString not in source String)
+;		  (The Position of the first occurrence of the searchString in the sourceString )
+;----------------------------------------------
+FindPosition 				PROTO,
+	:DWORD,:DWORD
+
 
 ;----------------------------------------------
 ; HandleLogin:handle login message from client through connfd
@@ -118,6 +129,15 @@ HandleAddFriend 		PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleDelFriend:handle del friend message from client through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleDelFriend 		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; HandleSendMsg:handle message from client to another client through connfd
 ;	  args1:connfd:DWORD,
 ;	  args2:msg:PTR CLIENT_MSG
@@ -161,6 +181,7 @@ SkinName				db	"asus.she",0
 IDD_DIALOG1				equ 1100
 IDC_LIST            	equ 1101
 IDC_BUTTON          	equ 1102
+IDI_ICON				equ 1103
 
 ;------------------ BUTTON -----------------------
 BTN_UPTEXT              db "STOP SERVER", 0
@@ -182,7 +203,9 @@ SEARCHFRIEND            db '.\\config\\FRIENDS\\*.*',0
 CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
 CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
-SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
+UNFRIENDED				db 'You are unfriended by %s',0
+SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0dh,0ah,0 
+SENTENCEME				db '%s (Me):',0dh,0ah,'%s',0dh,0ah,0dh,0ah,0
 
 ;==================== DATA =====================
 .data

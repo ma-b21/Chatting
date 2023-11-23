@@ -148,13 +148,13 @@ GroupExpand=0,1,1,0
 [BreakPoint]
 0=
 [Find]
-1="MB_OK"
-2="TP_UNAMEBLANK"
-3="C_ADDFRIEND"
-4="offset debug"
-5="closesocket"
-6="GetStringLen"
-7="LoginClassName"
-8="MessageBox"
-9="dlgName"
-10="edx"
+1="UpdateChatHistory"
+2="MB_OK"
+3="TP_UNAMEBLANK"
+4="C_ADDFRIEND"
+5="offset debug"
+6="closesocket"
+7="GetStringLen"
+8="LoginClassName"
+9="MessageBox"
+10="dlgName"

@@ -126,6 +126,13 @@ UpdateFriendList			PROTO
 GetChatHistory 				PROTO
 
 ;----------------------------------------------
+; GetChatHistoryRec:Get chat history from server 
+;     args:None
+;     ret:None
+;----------------------------------------------
+GetChatHistoryRec 				PROTO
+
+;----------------------------------------------
 ; UpdateChatHistory:Update chat history in chatbox 
 ;     args:msg:PTR BYTE
 ;     ret:None

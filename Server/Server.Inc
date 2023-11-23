@@ -156,6 +156,15 @@ HandleHistory 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
 ;----------------------------------------------
+; HandleHistoryRec:handle message from client to get chat history through connfd
+;	  args1:connfd:DWORD,
+;	  args2:msg:PTR CLIENT_MSG
+;	  ret:None
+;----------------------------------------------
+HandleHistoryRec		PROTO,
+	:DWORD,:PTR CLIENT_MSG
+
+;----------------------------------------------
 ; UpdateClientList:update the CLIENTLIST
 ;	  args:None
 ;	  ret:None
@@ -204,7 +213,8 @@ CHATHISTORYDIR          db '.\\config\\CHATHISTORY\\%s',0
 CHATHISTORY             db '.\\config\\CHATHISTORY\\%s\\%s',0 
 ADDEDASFRIEND           db 'You are added as friend of %s',0
 UNFRIENDED				db 'You are unfriended by %s',0
-SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0 
+SENTENCE                db '%s:',0dh,0ah,'%s',0dh,0ah,0dh,0ah,0 
+SENTENCEME				db '%s (Me):',0dh,0ah,'%s',0dh,0ah,0dh,0ah,0
 
 ;==================== DATA =====================
 .data
