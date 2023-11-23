@@ -2,8 +2,10 @@ IFNDEF UTILS_HEADER
 UTILS_HEADER PROTO
 
 include 		masm32rt.inc
+include         shlwapi.inc
 include 		ws2_32.inc
 includelib 		masm32.lib
+includelib      shlwapi.lib
 includelib 		ws2_32.lib
 
 ;==================== Function =====================
@@ -44,12 +46,19 @@ CLIENT 			STRUCT
 CLIENT 			ENDS
 
 ;===================== MACRRO ======================
+
+EN_LINK 				equ 70Bh
+
 ;--------------------- C_SIGN ----------------------
 C_LOGIN                	equ	800h
 C_REGISTER        		equ 801h
 C_LOGOUT                equ 805h
 C_GETFRIEND             equ 810h
 C_ADDFRIEND             equ 811h
+C_SENDMSG               equ 816h
+C_GETHISTORY            equ 818h
+C_DELFRIEND				equ 819h
+C_SENDFILE				equ 822h
 
 ;--------------------- S_SIGN ----------------------
 S_LOGINOK               equ 802h
@@ -63,6 +72,9 @@ S_ADDERRNOUSER          equ 812h
 S_ADDOK					equ 813h
 S_ADDFRIENDEXISTS       equ 814h
 S_UAREADDED             equ 815h
+S_FORWARDMSG            equ 817h
+S_DELOK					equ 820h
+S_UNFRIENDED			equ 821h
 
 ;===================== CONST =======================
 .const

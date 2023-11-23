@@ -13,6 +13,12 @@ Main PROC
 	mov	   CommandLine,eax
 	invoke LoadLibrary, offset RichEditDll
 	mov hRichEditDll, eax
+	invoke GetModuleFileName,NULL,OFFSET CurrentDir,256
+	invoke PathRemoveFileSpec,OFFSET CurrentDir
+	
+	invoke CreateDirectory,OFFSET filePath,NULL
+	invoke lstrcat,OFFSET CurrentDir,OFFSET fileBreak
+	invoke lstrcat,OFFSET CurrentDir,OFFSET filePath
 	
 	invoke Login,hInstance,NULL,CommandLine,SW_SHOWDEFAULT
 	.IF LOGINFLAG != 0
@@ -100,15 +106,16 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		;get friend list
 		invoke UpdateFriendList
 		invoke CreateThread,NULL,0,OFFSET CommunicateWithServer,NULL,0,NULL
-		
-		;set timer to get history
-		;invoke SetTimer,MainhWnd,ID_TIMER,100,OFFSET GetChatHistory
 	
 		;load icon
 		invoke LoadIcon,hInstance,IDI_ICON
 		mov @hicon,eax
 		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
 		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
+		
+		;set richedit
+		invoke SendMessage,chathWnd,EM_SETEVENTMASK,0,ENM_LINK
+		invoke SendMessage,chathWnd,EM_AUTOURLDETECT,TRUE,0
 		
 	.ELSEIF eax == WM_COMMAND
 		mov eax,wParam
@@ -142,9 +149,76 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			.IF eax == LBN_SELCHANGE
 				invoke GetChatHistory
 			.ENDIF
-			
-		.ENDIF
 		
+		.ELSEIF eax == IDC_MFILEBTN
+			invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+			.IF eax == LB_ERR
+				xor eax, eax
+				ret
+			.ENDIF
+			mov @selectItem,eax
+			invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+			
+			invoke ChooseFile,ADDR @targetName
+			
+			invoke Sleep,50
+			
+			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
+		
+		.ENDIF
+	
+	.ELSEIF eax == WM_NOTIFY
+		mov eax,wParam
+		and eax,lower
+		mov esi,lParam
+        assume esi:ptr NMHDR
+        .IF eax == IDC_MCHATBOX && [esi].code == EN_LINK
+            ; RichEdit 控件接收到 EN_LINK 消息
+            ; 处理链接点击事件
+            mov esi, lParam
+            assume esi:ptr ENLINK
+            .IF [esi].msg == WM_LBUTTONDOWN
+            	invoke SendMessage,chathWnd,EM_SETSEL,[esi].chrg.cpMin,[esi].chrg.cpMax
+            	; 链接被点击
+            	mov ebx, [esi].chrg.cpMin ; 获取链接起始位置
+            	mov edx, [esi].chrg.cpMax ; 获取链接结束位置
+            	sub edx, ebx ; 计算链接长度
+				inc edx
+            	; 分配内存保存链接文本
+            	invoke GlobalAlloc, GMEM_FIXED, edx ; 加 1 是为了 null 终止符
+            	mov edi, eax
+            	
+            	
+            	.IF edi != NULL
+                	; 获取链接文本
+                	invoke SendMessage, chathWnd, EM_GETSELTEXT, 0, edi
+                	; 设置 null 终止符
+                	mov BYTE PTR [edi + edx], 0
+
+                	; 此时 edi 指向包含链接文本的内存块
+                	; 可以在这里处理链接文本
+                	add edi,7
+                	
+                	invoke wsprintf,OFFSET textBuffer,OFFSET fileFormat,OFFSET CurrentDir,edi
+                	
+					invoke ShellExecute,NULL,OFFSET operation,OFFSET textBuffer,0,0,SW_SHOWNORMAL
+    				.IF eax <= 32
+    					invoke MessageBox,MainhWnd,OFFSET TP_FILENOTEXIST,OFFSET mainName,MB_OK
+    				.ENDIF
+
+                ; 释放分配的内存
+                invoke GlobalFree, edi
+            	invoke SendMessage,chathWnd,EM_SETSEL,-1,-1
+            .ENDIF
+
+            
+                ; 链接被点击
+                ;
+            .ENDIF
+            assume esi:nothing
+        .ENDIF
+        assume esi:nothing
+	
 	.ELSEIF eax == WM_CLOSE
 		;invoke KillTimer,MainhWnd,ID_TIMER
 		invoke SendRequest,C_LOGOUT,NULL,NULL
@@ -237,11 +311,15 @@ LoginProc PROC uses ebx,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 		invoke SendMessage,hWin,WM_SETICON,ICON_BIG,@hicon
 		invoke SendMessage,hWin,WM_SETICON,ICON_SMALL,@hicon
 		
+		;set richedit
+		invoke SendMessage,chathWnd,EM_SETEVENTMASK,0,ENM_LINK
+		invoke SendMessage,chathWnd,EM_AUTOURLDETECT,TRUE,NULL
+		
 	.ELSEIF eax == WM_COMMAND
 		
 		mov eax, wParam
 		.IF eax == IDC_LOGINBUTTON
-			;@SetServerIP
+			@SetServerIP
 			@ConnectServerIfNoConnection
 			mov eax,0
 			.IF connfd != -1
@@ -491,6 +569,14 @@ HandleRecvServerMsg  PROC
 		.ELSEIF @server_msg.S_Sign == S_UNFRIENDED
 			invoke MessageBox,MainhWnd,ADDR @server_msg.S_Text,OFFSET mainName,MB_OK or MB_APPLMODAL
 			invoke UpdateFriendList
+		.ELSEIF @server_msg.S_Sign == S_FILECONFIRM
+			invoke SendFile
+		.ELSEIF @server_msg.S_Sign == S_SENDFILE
+			invoke SendRequest,C_FILECONFIRM,NULL,NULL
+			invoke lstrcpy,OFFSET chFileName,OFFSET CurrentDir
+			invoke lstrcat,OFFSET chFileName,OFFSET fileBreak
+			invoke lstrcat,OFFSET chFileName,ADDR @server_msg.S_Text
+			invoke ReceiveFile
 		.ENDIF
 	.ENDIF
 	ret
@@ -566,20 +652,125 @@ GetChatHistory PROC
 
 GetChatHistory ENDP
 
+;UpdateChatHistory PROC, msg:PTR BYTE
+	
+	;LOCAL @dataLen:DWORD
+	
+	
+	;invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
+
+	;invoke GetWindowTextLength,chathWnd
+	;mov @dataLen,eax
+	;invoke SendMessage,chathWnd,EM_SETSEL,@dataLen,@dataLen
+	;invoke SendMessage,chathWnd,EM_SCROLL,SB_BOTTOM,0
+	
+	
+    ;ret
+
+;UpdateChatHistory ENDP
+
+
 UpdateChatHistory PROC, msg:PTR BYTE
-	
-	LOCAL @dataLen:DWORD
 
-	invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
+    LOCAL @dataLen:DWORD
 
-	invoke GetWindowTextLength,chathWnd
-	mov @dataLen,eax
-	invoke SendMessage,chathWnd,EM_SETSEL,@dataLen,@dataLen
-	invoke SendMessage,chathWnd,EM_SCROLL,SB_BOTTOM,0
-	
+    ; 获取聊天窗口文本长度
+    invoke GetWindowTextLength, chathWnd
+    mov @dataLen, eax
+
+    ; 发送EM_SETTEXTEX消息
+    invoke SendMessage, chathWnd, EM_SETSEL, 0, @dataLen
+    invoke SendMessage, chathWnd, EM_REPLACESEL, 0, msg ; 替换当前选择的文本
+
+    ; 滚动到底部
+    invoke SendMessage, chathWnd, EM_SCROLL, SB_BOTTOM, 0
+    
     ret
-
 UpdateChatHistory ENDP
 
+ChooseFile  PROC, target:PTR BYTE
+
+    LOCAL @ofn:OPENFILENAME
+    ;LOCAL @chFileName[256]:BYTE
+    
+    invoke RtlZeroMemory,ADDR @ofn,SIZEOF @ofn
+    
+    mov @ofn.lStructSize, SIZEOF @ofn
+    mov @ofn.hwndOwner,NULL
+    mov @ofn.lpstrFile,OFFSET chFileName
+    mov @ofn.nMaxFile, SIZEOF chFileName
+    mov @ofn.lpstrFilter, OFFSET fileFilter
+    mov @ofn.lpstrTitle, OFFSET fileTitle
+    mov @ofn.Flags, OFN_PATHMUSTEXIST or OFN_FILEMUSTEXIST
+    
+    invoke GetOpenFileName, ADDR @ofn
+    
+    .IF eax == FALSE
+        invoke MessageBox, MainhWnd, OFFSET TP_FILENOTEXIST, OFFSET mainName, MB_OK
+    .ELSE
+        invoke PathFindFileName,OFFSET chFileName
+        mov esi,eax
+        invoke wsprintf,OFFSET textBuffer,OFFSET fileFormat,OFFSET CurrentDir,esi
+        invoke CopyFile,OFFSET chFileName,OFFSET textBuffer,FALSE
+        invoke SendRequest,C_SENDFILE,target,esi
+             
+    .ENDIF
+    
+    ret
+ChooseFile ENDP
+
+SendFile	PROC
+	
+	LOCAL @handle:HANDLE
+	LOCAL @bytesRead:DWORD
+	LOCAL @bytesSent:DWORD
+	LOCAL @selectItem:DWORD
+	LOCAL @targetName[128]:BYTE
+	
+	invoke CreateFile,OFFSET chFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @handle,eax
+	
+	mov @bytesRead,1
+	
+	.WHILE @bytesRead != 0
+		invoke ReadFile,@handle,OFFSET textBuffer,8192,ADDR @bytesRead,NULL
+		invoke send,connfd,OFFSET textBuffer,@bytesRead,0
+	.ENDW
+	
+	invoke Sleep,50
+	
+	invoke send,connfd,OFFSET fileRead,3,0
+	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
+	mov @selectItem,eax
+	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
+	
+	;invoke SendRequest,C_ENDFILE,ADDR @targetName,NULL
+	invoke CloseHandle,@handle
+	
+	ret
+
+SendFile ENDP
+
+ReceiveFile PROC
+	
+	LOCAL @handle:HANDLE
+	LOCAL @bytesRecv:DWORD
+	
+	invoke CreateFile,OFFSET chFileName,GENERIC_WRITE,0,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @handle,eax
+	
+	mov @bytesRecv,1
+	.WHILE @bytesRecv != 0
+		
+		invoke recv,connfd,OFFSET textBuffer,8192,0
+		mov @bytesRecv,eax
+		
+		invoke WriteFile,@handle,OFFSET textBuffer,@bytesRecv,NULL,NULL
+		
+	.ENDW
+	
+	ret
+
+ReceiveFile ENDP
 
 end Main

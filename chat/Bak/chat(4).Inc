@@ -5,7 +5,7 @@ includelib kernel32.lib
 includelib shell32.lib
 includelib comctl32.lib
 includelib comdlg32.lib
-includelib riched20.lib
+;includelib riched20.lib
 
 ;================== FUNCTION ==================
 
@@ -133,6 +133,20 @@ GetChatHistory 				PROTO
 UpdateChatHistory 			PROTO,
 	:PTR BYTE
 
+;----------------------------------------------
+; ChooseFile:choose file to send
+;     args:send file target
+;     ret:None
+;----------------------------------------------
+ChooseFile					PROTO,
+	:PTR BYTE
+
+;----------------------------------------------
+; SendFile:send the file chFileName
+;     args:None
+;     ret:None
+;----------------------------------------------
+SendFile					PROTO
 
 ;==================	MACRO =================
 IDD_LOGIN			equ 1000
@@ -149,6 +163,7 @@ IDC_MSENDBTN        equ 1010
 IDC_MFRIENDLIST     equ 1011
 IDC_MADDFRIENDBTN   equ 1012
 IDC_MDELFRIENDBTN	equ 1020
+IDC_MFILEBTN		equ 1021
 
 IDD_ADD             equ 1013
 IDC_FRIENDNAME      equ 1015
@@ -200,11 +215,22 @@ ENDM
     movzx edx, al
     movzx esi, ah
 	
-	invoke wsprintf, ADDR DEFAULT_IP,ADDR ipFormat,ebx, ecx, edx, esi
+	invoke wsprintf, ADDR DEFAULT_IP,ADDR ipFormat,esi, edx, ecx, ebx
 	
 ENDM
 
 .const
+;------------------ FILE ------------------------
+operation				db  "open",0
+filePath				db  "file",0
+fileBreak				db  "\",0
+fileTitle				db  "Select a file",0
+fileFilter 				db  "All Files (*.*)", 0, "*.*", 0, 
+							"Text Files (*.txt)", 0, "*.txt", 0, 
+            				"Image Files (*.jpg;*.jpeg;*.png)", 0, "*.jpg;*.jpeg;*.png", 0,
+            				"Document Files (*.doc;*.docx;*.pdf)", 0, "*.doc;*.docx;*.pdf", 0,
+            				0
+            
 ;------------------ SKIN ------------------------
 SkinDllName				db	"Skin.dll",0
 SkinFuncName			db	"SkinH_AttachEx",0
@@ -237,6 +263,7 @@ TP_CANTADDSELF          db 'You cannot add yourself as a friend',0
 TP_FRIENDEXISTS         db 'That friend is already exists',0
 TP_DELSUCCESS			db 'Delete Friend Success',0
 TP_NULL                 db 0,0
+TP_FILENOTEXIST			db 'The file is not exists',0
 .data
 
 hInstance				dd ?      		 	;handle of process
@@ -260,6 +287,7 @@ frNamehWnd              dd ?				;friend name input
 addSearchhWnd           dd ?				;add button handle
 
 ipAddress               dd ?
+chFileName				db 256 dup(?)
 
 connfd 					dd -1				;connect socket
 LOGINFLAG               dd 0				;if login open main window
@@ -268,6 +296,8 @@ PassWord                db 128 dup(0), 0
 
 ;------------------ BUFFER ----------------------
 textBuffer              db 8192 dup(0), 0
+CurrentDir				db 256 dup(0), 0
+fileFormat				db "%s\%s",0
 
 ;------------------ SOCKET ---------------------- 
 DEFAULT_IP              db 20 dup(0)
