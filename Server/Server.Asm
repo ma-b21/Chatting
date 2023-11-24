@@ -182,10 +182,6 @@ CommunicateWithClient   PROC, connfd:DWORD
             .CONTINUE
         .ENDIF
         
-        .IF fileTrans == 1
-        	.CONTINUE
-        .ENDIF
-        
         invoke HandleRecvClientMsg,connfd
 	.ENDW
 	
@@ -250,8 +246,6 @@ HandleRecvClientMsg     PROC, connfd:DWORD
     		invoke HandleDelFriend,connfd,esi
 		.ELSEIF [esi].C_Sign == C_SENDFILE
 			invoke HandleSendFile,connfd,esi
-		.ELSEIF [esi].C_Sign == C_PARTFILE
-			invoke HandlePartFile,connfd,esi
 		.ENDIF
 	.ENDIF
 
@@ -697,11 +691,10 @@ HandleSendFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	
 	LOCAL @fileHandle:DWORD
 	LOCAL @source[128]:BYTE
+	LOCAL @sfileName[128]:BYTE
 	LOCAL @dataLen:DWORD
 	LOCAL @targetSocket:DWORD
 	LOCAL @new_msg:CLIENT_MSG
-	LOCAL @bytesRecv:DWORD
-	LOCAL @bytesWrit:DWORD
 	
 	mov @targetSocket,-1
 	mov  esi,msg
@@ -741,7 +734,7 @@ HandleSendFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	invoke SetFilePointer,@fileHandle,0,NULL,FILE_END
 	
 	invoke wsprintf,OFFSET BUFFER,OFFSET FILEINCHAT,ADDR [esi].C_Text
-	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCE,ADDR @source,OFFSET BUFFER
+	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCEME,ADDR @source,OFFSET BUFFER
 	invoke lstrlen,OFFSET HD_STRINGBUFFER
 	mov @dataLen,eax
 		
@@ -760,70 +753,135 @@ HandleSendFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	invoke wsprintf,OFFSET HD_STRINGBUFFER,OFFSET SENTENCE,ADDR @source,OFFSET BUFFER
 	invoke lstrlen,OFFSET HD_STRINGBUFFER
 	mov @dataLen,eax
+	
+	invoke lstrcpy,ADDR @sfileName,ADDR [esi].C_Text
+	
 		
 	invoke WriteFile,@fileHandle,OFFSET HD_STRINGBUFFER,@dataLen,NULL,NULL
-		
 	invoke CloseHandle,@fileHandle
-	
-	invoke SendServerResponse,connfd,S_FILECONFIRM,NULL
-	mov fileTrans,1
 	
 	;recv File
-	invoke CreateFile,OFFSET TEMP,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
-	mov @fileHandle,eax
-	
-	mov @bytesRecv,1
-	.WHILE TRUE
-		invoke RtlZeroMemory,OFFSET READSOCKETBUFFER,8192
-		invoke recv,connfd,OFFSET READSOCKETBUFFER,8192,0
-		mov @bytesRecv,eax
-		.IF @bytesRecv == 0 || @bytesRecv < 0
-			.BREAK
-		.ENDIF
-		
-		invoke lstrcmp,OFFSET READSOCKETBUFFER,OFFSET fileWrite
-		.IF eax == 0
-			.break
-		.endif
-		
-		invoke WriteFile,@fileHandle,OFFSET READSOCKETBUFFER,@bytesRecv,ADDR @bytesWrit,NULL
-		
-	.ENDW
+	invoke RecvFile,connfd
 	
 	
 	
-		
-	invoke CloseHandle,@fileHandle
-	
-	invoke MessageBox,NULL,NULL,NULL,MB_OK
 	;forward message
 	.IF @targetSocket != -1
+		invoke SendFile,@targetSocket,ADDR @sfileName
 		mov @new_msg.C_Sign,C_GETHISTORY
 		invoke lstrcpy,ADDR @new_msg.C_Target,ADDR @source
 		invoke lstrcpy,ADDR @new_msg.C_Text,ADDR [esi].C_Target
-		
 		invoke HandleHistory,@targetSocket,ADDR @new_msg
 	.ENDIF
 	
-	mov fileTrans,0
 	ASSUME esi:nothing
 	ret
 
 HandleSendFile ENDP
 
-HandlePartFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
+RecvFile PROC,connfd:DWORD
 	
-	LOCAL @dataLen:DWORD
+	LOCAL @fileHandle:DWORD
+	LOCAL @dataSocket:DWORD
+	LOCAL @dataListenSocket:DWORD
+	LOCAL @bytesRecv:DWORD
+	LOCAL @bytesWrit:DWORD
 	
-	mov  esi,msg
-	ASSUME esi: PTR CLIENT_MSG
+	;recv File
+	invoke CreateFile,OFFSET TEMP,GENERIC_WRITE,FILE_SHARE_WRITE,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @fileHandle,eax
 	
+	;recv temp file
+	invoke SendServerResponse,connfd,S_FILECONFIRM,NULL
+	
+	invoke CreateSocketForServer,DEFAULT_DATAPORT
+	mov @dataListenSocket, eax
+	
+	invoke listen,@dataListenSocket,1
+	.IF eax == -1
+		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		ret
+	.ENDIF
+	
+	invoke accept,@dataListenSocket,NULL,NULL
+	mov @dataSocket,eax
+       
+	.IF eax == -1
+		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		ret
+	.ENDIF
+	
+	invoke closesocket,@dataListenSocket
 
+	.WHILE TRUE
 	
-	ASSUME esi:nothing
+		invoke RtlZeroMemory,OFFSET READSOCKETBUFFER,8192
+		invoke recv,@dataSocket,OFFSET READSOCKETBUFFER,8192,0
+		mov @bytesRecv,eax
+		
+		.IF @bytesRecv == 0 || @bytesRecv < 0
+			.BREAK
+		.ENDIF
+		
+		invoke WriteFile,@fileHandle,OFFSET READSOCKETBUFFER,@bytesRecv,ADDR @bytesWrit,NULL
+	
+	.ENDW
+	
+	invoke CloseHandle,@fileHandle
+	invoke closesocket,@dataSocket
+	
 	ret
 
-HandlePartFile ENDP
+RecvFile ENDP
+
+SendFile PROC,connfd:DWORD,fileName:PTR BYTE
+	
+	LOCAL @fileHandle:HANDLE
+	LOCAL @bytesRead:DWORD
+	LOCAL @bytesSent:DWORD
+	LOCAL @dataSocket:DWORD
+	LOCAL @dataListenSocket:DWORD
+	
+	
+	invoke CreateFile,OFFSET TEMP,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL
+	mov @fileHandle,eax
+	
+	invoke SendServerResponse,connfd,S_SENDFILE,fileName
+	
+	invoke CreateSocketForServer,DEFAULT_DATAPORT
+	mov @dataListenSocket, eax
+	
+	invoke listen,@dataListenSocket,1
+	.IF eax == -1
+		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		ret
+	.ENDIF
+	
+	invoke accept,@dataListenSocket,NULL,NULL
+	mov @dataSocket,eax
+       
+	.IF eax == -1
+		invoke MessageBox,NULL,OFFSET SOCKET_ERR,OFFSET ERR_TITLE,MB_OK
+		ret
+	.ENDIF
+	
+	invoke closesocket,@dataListenSocket
+	
+	.WHILE TRUE
+		invoke RtlZeroMemory,OFFSET READFILEBUFFER,8192
+		invoke ReadFile,@fileHandle,OFFSET READFILEBUFFER,8192,ADDR @bytesRead,NULL
+		.IF @bytesRead == 0
+			.BREAK
+		.ENDIF
+		invoke send,@dataSocket,OFFSET READFILEBUFFER,@bytesRead,0
+	.ENDW
+	
+	invoke closesocket,@dataSocket
+	invoke CloseHandle,@fileHandle
+	
+	ret
+
+SendFile ENDP
 
 HandleHistory PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 
@@ -886,7 +944,6 @@ HandleHistoryRec PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 	ret
 
 HandleHistoryRec ENDP
-
 
 SendServerResponse PROC,connfd:DWORD,sign:DWORD,text:PTR BYTE
 

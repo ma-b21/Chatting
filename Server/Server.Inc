@@ -158,8 +158,22 @@ HandleSendMsg 			PROTO,
 HandleSendFile 			PROTO,
 	:DWORD,:PTR CLIENT_MSG
 
-HandlePartFile 			PROTO,
-	:DWORD,:PTR CLIENT_MSG
+;----------------------------------------------
+; RecvFile:receive file from client  connfd
+;	  args1:connfd:DWORD
+;	  ret:None
+;----------------------------------------------
+RecvFile 				PROTO,
+	:DWORD
+	
+;----------------------------------------------
+; SendFile:send file to client connfd
+;	  args1:connfd:DWORD
+;	  args2:fileName:PTR BYTE
+;	  ret:None
+;----------------------------------------------
+SendFile 				PROTO,
+	:DWORD,:PTR BYTE
 
 ;----------------------------------------------
 ; HandleHistory:handle message from client to get chat history through connfd
@@ -214,11 +228,11 @@ BTN_DOWNTEXT            db "START SERVER", 0
 
 ;------------------ SOCKET -----------------------
 DEFAULT_PORT            equ 22910
+DEFAULT_DATAPORT		equ 30414
 MAX_CONNECT             equ 100
 
 ;------------------- STRING ----------------------
-fileWrite				db 'ab',0
-TEMP					db 'pic1.png',0
+TEMP					db 'TEMP',0
 FILE                	db '.\\config\\USERINFO', 0 ; The user info is like "User:uname|passwd\r\n"
 LINEBREAK               db 0dh,0ah, 0
 USERFORM                db "User:%s|",0

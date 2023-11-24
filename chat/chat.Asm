@@ -137,7 +137,6 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke SendMessage,sendhWnd,WM_GETTEXT,8192,OFFSET textBuffer
 			
 			invoke SendRequest,C_SENDMSG,ADDR @targetName,OFFSET textBuffer
-			
 			invoke Sleep,50
 			
 			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
@@ -162,9 +161,8 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke ChooseFile,ADDR @targetName
 			
 			invoke Sleep,50
+			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
 			
-			;invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
-		
 		.ENDIF
 	
 	.ELSEIF eax == WM_NOTIFY
@@ -575,7 +573,6 @@ HandleRecvServerMsg  PROC
 		.ELSEIF @server_msg.S_Sign == S_FILECONFIRM
 			invoke SendFile
 		.ELSEIF @server_msg.S_Sign == S_SENDFILE
-			invoke SendRequest,C_FILECONFIRM,NULL,NULL
 			invoke lstrcpy,OFFSET chFileName,OFFSET CurrentDir
 			invoke lstrcat,OFFSET chFileName,OFFSET fileBreak
 			invoke lstrcat,OFFSET chFileName,ADDR @server_msg.S_Text
@@ -672,24 +669,6 @@ GetChatHistoryRec PROC
 
 GetChatHistoryRec ENDP
 
-;UpdateChatHistory PROC, msg:PTR BYTE
-	
-	;LOCAL @dataLen:DWORD
-	
-	
-	;invoke SendMessage,chathWnd,WM_SETTEXT,0,msg
-
-	;invoke GetWindowTextLength,chathWnd
-	;mov @dataLen,eax
-	;invoke SendMessage,chathWnd,EM_SETSEL,@dataLen,@dataLen
-	;invoke SendMessage,chathWnd,EM_SCROLL,SB_BOTTOM,0
-	
-	
-    ;ret
-
-;UpdateChatHistory ENDP
-
-
 UpdateChatHistory PROC, msg:PTR BYTE
 
     LOCAL @dataLen:DWORD
@@ -744,29 +723,25 @@ SendFile	PROC
 	LOCAL @handle:HANDLE
 	LOCAL @bytesRead:DWORD
 	LOCAL @bytesSent:DWORD
-	LOCAL @selectItem:DWORD
-	LOCAL @targetName[128]:BYTE
+	LOCAL @dataSocket:DWORD
+	
 	
 	invoke CreateFile,OFFSET chFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL
 	mov @handle,eax
 	
+	invoke ConnectSocketForClient,DEFAULT_DATAPORT, ADDR DEFAULT_IP
+	mov @dataSocket,eax
 	
 	.WHILE TRUE
+		invoke RtlZeroMemory,OFFSET textBuffer,8192
 		invoke ReadFile,@handle,OFFSET textBuffer,8192,ADDR @bytesRead,NULL
 		.IF @bytesRead == 0
 			.BREAK
 		.ENDIF
-		invoke send,connfd,OFFSET textBuffer,@bytesRead,0
+		invoke send,@dataSocket,OFFSET textBuffer,@bytesRead,0
 	.ENDW
 	
-	invoke Sleep,50
-	
-	invoke send,connfd,OFFSET fileRead,3,0
-	invoke SendMessage,listhWnd,LB_GETCURSEL,0,0
-	mov @selectItem,eax
-	invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
-	
-	;invoke SendRequest,C_ENDFILE,ADDR @targetName,NULL
+	invoke closesocket,@dataSocket
 	invoke CloseHandle,@handle
 	
 	ret
@@ -777,19 +752,31 @@ ReceiveFile PROC
 	
 	LOCAL @handle:HANDLE
 	LOCAL @bytesRecv:DWORD
+	LOCAL @dataSocket:DWORD
+	LOCAL @bytesWrit:DWORD
 	
 	invoke CreateFile,OFFSET chFileName,GENERIC_WRITE,0,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL
 	mov @handle,eax
 	
-	mov @bytesRecv,1
-	.WHILE @bytesRecv != 0
-		
-		invoke recv,connfd,OFFSET textBuffer,8192,0
+	invoke ConnectSocketForClient,DEFAULT_DATAPORT, ADDR DEFAULT_IP
+	mov @dataSocket,eax
+	
+	.WHILE TRUE
+	
+		invoke RtlZeroMemory,OFFSET textBuffer,8192
+		invoke recv,@dataSocket,OFFSET textBuffer,8192,0
 		mov @bytesRecv,eax
 		
-		invoke WriteFile,@handle,OFFSET textBuffer,@bytesRecv,NULL,NULL
+		.IF @bytesRecv == 0 || @bytesRecv < 0
+			.BREAK
+		.ENDIF
 		
+		invoke WriteFile,@handle,OFFSET textBuffer,@bytesRecv,ADDR @bytesWrit,NULL
+	
 	.ENDW
+	
+	invoke CloseHandle,@handle
+	invoke closesocket,@dataSocket
 	
 	ret
 

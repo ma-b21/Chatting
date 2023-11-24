@@ -191,6 +191,7 @@ higher              equ 4294901760; 0xFFFF0000
 
 
 DEFAULT_PORT        equ 22910
+DEFAULT_DATAPORT    equ 30414
 
 ;================== MACRO ==================
 @ConnectServerIfNoConnection  MACRO
