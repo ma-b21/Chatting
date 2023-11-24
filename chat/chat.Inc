@@ -280,6 +280,8 @@ TP_FRIENDEXISTS         db 'That friend is already exists',0
 TP_DELSUCCESS			db 'Delete Friend Success',0
 TP_NULL                 db 0,0
 TP_FILENOTEXIST			db 'The file is not exists',0
+TP_FILESENDFAIL			db 'The user is not online,fail to send file',0
+
 .data
 
 hInstance				dd ?      		 	;handle of process

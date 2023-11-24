@@ -79,6 +79,7 @@ S_DELOK					equ 823h
 S_UNFRIENDED			equ 824h
 S_SENDFILE				equ 825h
 S_FILECONFIRM			equ 826h
+S_USERNOTONLINE			equ 827h
 
 ;===================== CONST =======================
 .const

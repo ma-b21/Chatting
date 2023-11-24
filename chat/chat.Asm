@@ -159,10 +159,6 @@ MainWinProc PROC,hWin:HWND,uMsg:UINT,wParam:WPARAM,lParam:LPARAM
 			invoke SendMessage,listhWnd,LB_GETTEXT,@selectItem,ADDR @targetName
 			
 			invoke ChooseFile,ADDR @targetName
-			
-			invoke Sleep,50
-			invoke SendRequest,C_GETHISTORY,OFFSET UserName,ADDR @targetName
-			
 		.ENDIF
 	
 	.ELSEIF eax == WM_NOTIFY
@@ -577,6 +573,8 @@ HandleRecvServerMsg  PROC
 			invoke lstrcat,OFFSET chFileName,OFFSET fileBreak
 			invoke lstrcat,OFFSET chFileName,ADDR @server_msg.S_Text
 			invoke ReceiveFile
+		.ELSEIF @server_msg.S_Sign == S_USERNOTONLINE
+			invoke MessageBox,MainhWnd,OFFSET TP_FILESENDFAIL,OFFSET mainName,MB_OK
 		.ENDIF
 	.ENDIF
 	ret
@@ -725,7 +723,6 @@ SendFile	PROC
 	LOCAL @bytesSent:DWORD
 	LOCAL @dataSocket:DWORD
 	
-	
 	invoke CreateFile,OFFSET chFileName,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL
 	mov @handle,eax
 	
@@ -743,6 +740,10 @@ SendFile	PROC
 	
 	invoke closesocket,@dataSocket
 	invoke CloseHandle,@handle
+	
+	invoke Sleep,300
+	invoke GetChatHistory
+	
 	
 	ret
 

@@ -772,7 +772,12 @@ HandleSendFile PROC,connfd:DWORD,msg:PTR CLIENT_MSG
 		invoke lstrcpy,ADDR @new_msg.C_Target,ADDR @source
 		invoke lstrcpy,ADDR @new_msg.C_Text,ADDR [esi].C_Target
 		invoke HandleHistory,@targetSocket,ADDR @new_msg
+		
+	.ELSE
+		invoke SendServerResponse,connfd,S_USERNOTONLINE,NULL
 	.ENDIF
+	
+	invoke DeleteFile,OFFSET TEMP
 	
 	ASSUME esi:nothing
 	ret
